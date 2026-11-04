@@ -1,10 +1,9 @@
-"""把视频、样音、配乐、资料包压缩包插进 7️⃣ 的占位段落所在单元格：media-insert 会把文件块插到表格后面的根层级，再 block_move_after 移到占位段落后面，最后删占位段落。
+"""把视频、样音、配乐、资料包压缩包插进 5️⃣ 的占位段落所在单元格：media-insert 会把文件块插到表格后面的根层级，再 block_move_after 移到占位段落后面，最后删占位段落。
 只认本包自己的占位名，已插过的（占位已删）自动跳过。"""
 import json, re, subprocess
 from pathlib import Path
 DOC = 'G4ojwsQrDiK3gikgYHUcv7y8nQc'; D = Path(__file__).resolve().parent
-FILES = {'meet-opening': ('视频', 'MMA3P_OPENING_确认版_720p.mp4', 'preview'), 'voice-rowan-R1': ('音频', 'voice-rowan-R1.mp3', 'preview'),
-         'voice-maisie-W2': ('音频', 'voice-maisie-W2.mp3', 'preview'), 'bgm-daylight': ('音频', 'bgm-daylight.mp3', 'preview'), 'meet-pack': ('附件', 'meet-pack.zip', 'card')}
+FILES = {'rian-opening': ('视频', 'RIAN_OPENING_外国人版v9_确认版.mp4', 'preview')}
 def run(*a, t=280):
     return subprocess.run(['lark-cli', 'docs', *a, '--doc', DOC], capture_output=True, text=True, timeout=t, cwd=D)
 c = json.loads(run('+fetch', '--scope', 'keyword', '--keyword', '|'.join(f'占位 {n}' for n in FILES), '--detail', 'with-ids').stdout)['data']['document']['content']
