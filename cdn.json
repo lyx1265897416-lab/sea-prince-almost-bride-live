@@ -1,0 +1,12 @@
+{
+ "media/OPEN.mp4": "https://storage.googleapis.com/waku-core-aicap/uploads/usr_4a6e5fb234d64da0a9429e519b299f07/f8ece17cf19c429783a16d9821b20018/OPEN.mp4",
+ "media/IDLE0.mp4": "https://storage.googleapis.com/waku-core-aicap/uploads/usr_4a6e5fb234d64da0a9429e519b299f07/f3c414c5bceb4dd0b0bcbf7be6960f64/IDLE0.mp4",
+ "media/poster.jpg": "https://storage.googleapis.com/waku-core-aicap/uploads/usr_4a6e5fb234d64da0a9429e519b299f07/65716f323cce4d4e9c79d5c2e093eba5/poster.jpg",
+ "audio/WAIT.mp3": "https://storage.googleapis.com/waku-core-aicap/uploads/usr_4a6e5fb234d64da0a9429e519b299f07/2257e3ba2b9848059d41170f2106adf2/WAIT.mp3",
+ "_sig": {
+  "media/OPEN.mp4": "40099283-1793782809",
+  "media/IDLE0.mp4": "1501843-1793782809",
+  "media/poster.jpg": "222883-1793782809",
+  "audio/WAIT.mp3": "2794413-1793782809"
+ }
+}

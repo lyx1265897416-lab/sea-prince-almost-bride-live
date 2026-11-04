@@ -1,0 +1,23 @@
+# 口令和运行数据不进仓库
+token.txt
+public_url.txt
+rounds/
+frames/
+logs/
+site
+__pycache__/
+*.pyc
+.DS_Store
+qa/
+qa_*.jpg
+opening-v1/*
+!opening-v1/*.py
+!opening-v1/*.md
+voices-v1/receipts/
+voices-v2/receipts/
+voices-v2/video/
+feishu/chunks/
+feishu/*.zip
+tests/runs/
+masters/urls.json
+feishu/urls.json

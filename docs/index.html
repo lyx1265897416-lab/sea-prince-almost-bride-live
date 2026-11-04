@@ -1,0 +1,317 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Sea Prince's Almost Bride</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600&family=Noto+Sans+SC:wght@400;500&display=swap">
+<style>
+/* Layout: one 9:16 screen, letterboxed on wide displays; everything sits on the video. Same player as Magnus third-person. */
+:root{
+  --night:#07090c;        /* garage black */
+  --concrete:#c9cdd2;     /* fluorescent grey text */
+  --mute:#8a9099;
+  --gold:#e7b350;         /* his eyes */
+  --gold-deep:#a8792a;
+  --glass:rgba(10,12,16,.62);
+  --line:rgba(231,179,80,.38);
+  --display:"Marcellus","Cormorant Garamond",Georgia,serif;
+  --body:"Figtree","Helvetica Neue",Arial,"Noto Sans SC","PingFang SC",sans-serif;
+  --zh:"Noto Sans SC","PingFang SC","Hiragino Sans GB",sans-serif;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;background:var(--night);color:var(--concrete);font-family:var(--body);overflow:hidden}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit}
+#stage{position:relative;height:100%;max-width:calc(100vh * 9 / 16);max-width:calc(100dvh * 9 / 16);margin:0 auto;overflow:hidden;background:#000;isolation:isolate}
+video.v{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;z-index:0;background:#000}
+video.v.on{opacity:1;z-index:1}
+.shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,.55),transparent 18%,transparent 52%,rgba(0,0,0,.78));z-index:2}
+.shade.deep{background:linear-gradient(to bottom,rgba(0,0,0,.55),transparent 18%,transparent 34%,rgba(0,0,0,.9))}
+/* top bar */
+#top{position:absolute;left:0;right:0;top:0;z-index:6;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(12px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+.brand{font-family:var(--display);letter-spacing:.18em;font-size:13px;text-transform:uppercase;color:var(--concrete);display:flex;gap:10px;align-items:baseline;min-width:0}
+.brand b{color:var(--gold);font-weight:400}
+.brand span{font-family:var(--body);letter-spacing:.08em;font-size:11px;color:var(--mute);white-space:nowrap}
+.icon{width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.35);display:grid;place-items:center;cursor:pointer;flex:none}
+.icon svg{width:18px;height:18px;display:block}
+.icon:focus-visible,.opt:focus-visible,.cta:focus-visible,#say button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+/* subtitles */
+#subs{position:absolute;left:0;right:0;z-index:4;bottom:calc(64px + env(safe-area-inset-bottom,0px));padding:0 max(20px,env(safe-area-inset-left,0px));text-align:center;pointer-events:none;display:flex;flex-direction:column;gap:3px;transition:bottom .25s ease}
+#subs .en{font-size:17px;line-height:1.35;color:#fff;font-weight:500;text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 14px rgba(0,0,0,.6);text-wrap:balance}
+#subs .zh{font-family:var(--zh);font-size:14px;color:#e9e3d6;text-shadow:0 1px 3px rgba(0,0,0,.9)}
+#subs .who{font-size:10px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase}
+#subs.you .en{color:var(--gold);font-style:italic}
+body.choosing #subs{top:auto}
+/* progress */
+#bar{position:absolute;left:0;right:0;bottom:0;z-index:5;padding:0 max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:12px}
+#track{flex:1;height:22px;display:flex;align-items:center;cursor:pointer;touch-action:none}
+#track i{display:block;height:2px;width:100%;background:rgba(255,255,255,.22);position:relative;border-radius:2px}
+#track i b{position:absolute;left:0;top:0;bottom:0;background:var(--gold);width:0;border-radius:2px}
+#chap{font-size:11px;letter-spacing:.12em;color:var(--mute);white-space:nowrap;text-transform:uppercase;font-variant-numeric:tabular-nums}
+body.choosing #bar,body.ended #bar,body.start #bar{display:none}
+/* pause badge */
+#paused{position:absolute;inset:0;z-index:3;display:grid;place-items:center;pointer-events:none}
+#paused div{width:66px;height:66px;border-radius:50%;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.25);display:grid;place-items:center}
+/* choice sheet */
+#sheet{position:absolute;left:0;right:0;bottom:0;z-index:7;padding:0 max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:10px;transform:translateY(12px);opacity:0;transition:opacity .35s ease,transform .35s ease;pointer-events:none}
+#sheet.show{opacity:1;transform:none;pointer-events:auto}
+.cue{font-size:12px;letter-spacing:.06em;color:var(--mute);text-align:center;font-style:italic;padding-bottom:2px}
+.cue .zh{font-family:var(--zh);font-style:normal;display:block;margin-top:2px}
+.opt{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px;min-height:56px;padding:11px 16px;border-radius:14px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);cursor:pointer;transition:border-color .2s,background .2s,transform .12s}
+.opt:hover{border-color:var(--gold)}
+.opt:active{transform:scale(.985)}
+.opt .en{font-size:15px;font-weight:500;color:#f4efe4;line-height:1.3}
+.opt .zh{font-family:var(--zh);font-size:12.5px;color:#cfc6b4}
+.opt.hint{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 0 22px rgba(231,179,80,.28)}
+#say{display:flex;gap:8px;align-items:center;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.5);padding:5px 5px 5px 14px}
+#say input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:#fff;font:inherit;font-size:15px;padding:8px 0}
+#say input::placeholder{color:#8f949c}
+#say button{width:40px;height:40px;border-radius:10px;border:0;background:var(--gold);color:#1a1206;display:grid;place-items:center;cursor:pointer;flex:none}
+#say button:disabled{background:#3a3d42;color:#777}
+#say button svg{width:18px;height:18px}
+.saynote{font-size:11px;color:#7d838c;text-align:center}
+/* start + end cards */
+.card{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;justify-content:flex-end;gap:16px;padding:calc(40px + env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) calc(30px + env(safe-area-inset-bottom,0px)) max(22px,env(safe-area-inset-left,0px));background:linear-gradient(to bottom,rgba(4,5,7,.15),rgba(4,5,7,.25) 35%,rgba(4,5,7,.92) 72%)}
+.card[hidden]{display:none!important}
+#endCard{background:linear-gradient(to bottom,rgba(4,5,7,.55),rgba(4,5,7,.88) 30%,rgba(4,5,7,.96));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);justify-content:center}
+.kicker{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold)}
+.card h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,10vw,46px);line-height:1.02;margin:0;color:#f6f1e6;letter-spacing:.02em;text-wrap:balance}
+.card h1 em{font-style:normal;color:var(--gold)}
+.card p{margin:0;font-size:15px;line-height:1.5;color:#d4d7dc;max-width:34ch}
+.card p.zh{font-family:var(--zh);font-size:13.5px;color:#b9bdc4;margin-top:-8px}
+.cta{align-self:stretch;min-height:54px;border-radius:14px;border:0;background:var(--gold);color:#1b1307;font-weight:600;font-size:16px;letter-spacing:.04em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+.cta.ghost{flex-direction:column;gap:1px;font-size:14px;line-height:1.25;background:transparent;border:1px solid rgba(255,255,255,.25);color:#e8e8e8;font-weight:500}
+.cta.ghost .zh{font-size:12px;color:#aab0b8}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.meta{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--mute);letter-spacing:.04em}
+.meta span::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold-deep);margin-right:7px;vertical-align:middle}
+.path{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13px;color:#cfd2d7}
+.path li{display:flex;gap:10px;align-items:baseline}
+.path li b{font-weight:500;color:var(--gold);font-size:11px;letter-spacing:.14em;min-width:22px}
+.path li .zh{font-family:var(--zh);color:#9ea3ab;font-size:12px}
+.tease{border-left:2px solid var(--gold);padding:2px 0 2px 12px;font-size:13.5px;line-height:1.5;color:#d9dbe0}
+.tease .zh{font-family:var(--zh);display:block;color:#a7abb2;font-size:12.5px;margin-top:3px}
+/* menu */
+#menu{position:absolute;z-index:9;top:calc(58px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));min-width:200px;background:rgba(14,16,20,.96);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:6px;display:flex;flex-direction:column}
+#menu button{background:none;border:0;text-align:left;padding:11px 12px;border-radius:9px;font-size:14px;cursor:pointer;display:flex;justify-content:space-between;gap:12px}
+#menu button:hover{background:rgba(255,255,255,.06)}
+#menu button small{color:var(--mute)}
+#toast{position:absolute;z-index:10;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.14);padding:8px 14px;border-radius:999px;font-size:12.5px;white-space:nowrap}
+.dots{display:inline-flex;gap:4px}.dots i{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:d 1s infinite}.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes d{0%,100%{opacity:.25}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+body.lang-en .zh{display:none!important}
+</style>
+<style>
+#liveChip{position:absolute;z-index:6;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));top:calc(58px + env(safe-area-inset-top,0px));font-size:11.5px;line-height:1.45;color:#cfd3d9;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:7px 10px}
+#liveChip b{color:var(--gold);font-weight:600}
+#liveWait{position:absolute;inset:0;z-index:7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(4,5,7,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);text-align:center;padding:0 24px}
+#liveWait .t{font-family:var(--display);font-size:44px;color:#f3eee2;font-variant-numeric:tabular-nums}
+#liveWait .s{font-size:13px;color:#d4d7dc;max-width:30ch}
+#liveWait .her{font-size:13px;color:var(--gold);font-style:italic;max-width:30ch}
+.rno{font-size:11px;letter-spacing:.16em;color:var(--mute);text-transform:uppercase;text-align:center;display:flex;justify-content:center;align-items:center;gap:10px}
+#replayBtn{background:none;border:1px solid rgba(255,255,255,.22);border-radius:999px;color:#e8e8e8;font-size:11px;letter-spacing:.04em;padding:3px 10px;cursor:pointer}
+</style>
+<div id="stage">
+  <video class="v" id="va" playsinline webkit-playsinline preload="auto"></video>
+  <video class="v" id="vb" playsinline webkit-playsinline preload="auto"></video>
+  <video class="v" id="vc" playsinline webkit-playsinline preload="auto"></video>
+  <div class="shade" id="shade"></div>
+  <header id="top">
+    <div class="brand"><b>Rian</b> Almost Bride <span>LIVE</span></div>
+    <button class="icon" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="#e8e8e8" stroke-width="1.8" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button>
+  </header>
+  <nav id="menu" hidden>
+    <button id="mLang"><span>Interface language</span><small id="mLangV"></small></button>
+    <button id="mRestart"><span>Restart from the opening</span></button>
+  </nav>
+  <div id="liveChip" hidden></div>
+  <div id="subs" aria-live="polite"></div>
+  <section id="sheet" aria-label="Your choice">
+    <div class="rno"><span id="rno"></span><button id="replayBtn" type="button" hidden></button></div>
+    <div class="cue" id="cue"></div>
+    <button class="opt" id="optA"></button>
+    <button class="opt" id="optB"></button>
+    <form id="say" autocomplete="off">
+      <input id="sayIn" maxlength="80" data-en-ph="Or say it your way…" data-zh-ph="或者，用你自己的话说…" aria-label="Say something to Rian">
+      <button id="sayBtn" type="submit" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button>
+    </form>
+  </section>
+  <div id="liveWait" hidden><div class="her" id="lwH"></div><div class="t"><span id="lwT">0.0</span>s</div><div class="s" id="lwS"></div></div>
+  <section class="card" id="startCard">
+    <div class="kicker" data-en="Live interactive test" data-zh="实时互动测试"></div>
+    <h1 id="title"></h1>
+    <p data-en="Where the story goes from here is up to how you play it. Tap a choice, or just type whatever you want to do." data-zh="故事接下来怎么走，就看你怎么演了。点选项，或者直接打字说你想做什么。"></p>
+    <div class="meta"><span id="modeMeta"></span><span>Vivix W1</span><span data-en="Sound on" data-zh="请打开声音"></span></div>
+    <button class="cta" id="startBtn" data-en="Start" data-zh="开始"></button>
+  </section>
+  <div id="toast" hidden></div>
+</div>
+<script src="rt-player.js?v=4"></script>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const Q = new URLSearchParams(location.search), K = Q.get('k') || '', MODE = Q.get('mode') || 'auto';
+// 长期链接（GitHub Pages）：页面在 Pages 上，中转地址从 relay.json 读（隧道重开后自动更新），视频走 GCS，取不到退回仓库里的文件；中转直接打开时和原来一样。口令只在链接里，不进仓库。
+const PAGES = location.hostname.endsWith('github.io');
+let API = location.origin;
+const relayReady = PAGES ? fetch('relay.json?t=' + Date.now(), {cache: 'no-store'}).then(r => r.json()).then(j => { API = j.url; }) : Promise.resolve();
+const CDN = {"media/OPEN.mp4": "https://storage.googleapis.com/waku-core-aicap/uploads/usr_4a6e5fb234d64da0a9429e519b299f07/f8ece17cf19c429783a16d9821b20018/OPEN.mp4", "media/IDLE0.mp4": "https://storage.googleapis.com/waku-core-aicap/uploads/usr_4a6e5fb234d64da0a9429e519b299f07/f3c414c5bceb4dd0b0bcbf7be6960f64/IDLE0.mp4", "media/poster.jpg": "https://storage.googleapis.com/waku-core-aicap/uploads/usr_4a6e5fb234d64da0a9429e519b299f07/65716f323cce4d4e9c79d5c2e093eba5/poster.jpg", "audio/WAIT.mp3": "https://storage.googleapis.com/waku-core-aicap/uploads/usr_4a6e5fb234d64da0a9429e519b299f07/2257e3ba2b9848059d41170f2106adf2/WAIT.mp3"};
+const SRC = p => PAGES && CDN[p] ? CDN[p] : p;
+const PREVIEW_NEXT = {cue: {zh: '他说完了，低头看着她，等她的回答。', en: 'He said it. Now he looks down at her, waiting for her answer.'}, A: {zh: '先配合他，找朋友要紧。', en: 'Play along—for now.'}, B: {zh: '当场反问：谁是你的新娘？', en: 'Call his bluff: whose bride?'}};
+const OPEN_CUES = [{"s": 0.2, "e": 2.8, "zh": "盐点港海岸 · 清晨 6:12", "en": "Saltpoint Coast · 6:12 AM", "who": ""}, {"s": 3.0, "e": 5.6, "zh": "Skye，你看！海水在发光！", "en": "Skye, look! The water is glowing!", "who": "Mila"}, {"s": 8.75, "e": 9.45, "zh": "米拉！", "en": "Mila!", "who": "Her"}, {"s": 29.4, "e": 31.65, "zh": "这是……哪里？", "en": "Where... am I?", "who": "Her"}, {"s": 29.6, "e": 32.2, "zh": "潮门 · 藏在海下的王宫", "en": "The Tidal Gate · a palace beneath the sea", "who": ""}, {"s": 37.7, "e": 41.15, "zh": "我朋友，穿黄外套的。她在哪？", "en": "My friend. Yellow jacket. Where is she?", "who": "Her"}, {"s": 41.6, "e": 47.7, "zh": "她很安全。访客不得进入这一翼。未登记的访客会被扣留，", "en": "She is safe. Visitors cannot enter this wing. Unregistered visitors are held,", "who": "Vessa"}, {"s": 47.7, "e": 50.15, "zh": "关于这里的记忆，也会被封存。", "en": "and their memory of this place is sealed.", "who": "Vessa"}, {"s": 62.85, "e": 63.6, "zh": "她跟我一起。", "en": "She is with me.", "who": "Rian"}, {"s": 66.65, "e": 67.5, "zh": "我未来的新娘。", "en": "My future bride.", "who": "Rian"}];
+const pool = [$('va'), $('vb'), $('vc')]; let front = pool[0];
+const wait = new Audio(SRC('audio/WAIT.mp3')); wait.loop = true; wait.volume = 0;
+let waitTarget = 0; setInterval(() => { const d = waitTarget - wait.volume; if (Math.abs(d) > .01) wait.volume = Math.max(0, Math.min(1, wait.volume + Math.sign(d) * .03)); if (waitTarget === 0 && wait.volume < .02 && !wait.paused) wait.pause(); }, 50);
+const waitMusic = on => { waitTarget = on ? .3 : 0; if (on && wait.paused) wait.play().catch(() => {}); };
+// 界面语言（V0.21）：?lang=zh / ?lang=en；不带参数跟系统语言。视频里的画面和台词始终是英文；中文界面下选项和字幕附中文翻译。
+// 菜单和顶部状态条是测试用信息，两种语言下都是全英文。
+const LANGQ = (Q.get('lang') || '').toLowerCase();
+let lang = LANGQ.startsWith('zh') ? 'zh' : LANGQ.startsWith('en') ? 'en' : (/^zh/i.test(navigator.language || '') ? 'zh' : 'en');
+const T = (en, zh) => lang === 'zh' ? zh : en;
+RT.init({drama: 'sea-prince-live', zh: () => lang === 'zh'});
+
+const applyLang = () => {
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en'; document.body.classList.toggle('lang-en', lang === 'en');
+  document.querySelectorAll('[data-en]').forEach(el => el.textContent = el.dataset[lang]);
+  $('title').innerHTML = T('He just called you his bride. <em>Your move.</em>', '他刚说你是他的新娘。<em>你怎么接？</em>');
+  document.querySelectorAll('[data-en-ph]').forEach(el => el.placeholder = lang === 'zh' ? el.dataset.zhPh : el.dataset.enPh);
+  $('mLangV').textContent = lang === 'en' ? 'English' : 'Chinese';
+  try { if (next && document.body.classList.contains('choosing')) fillChoice(); } catch (e) {}  // 首次调用时 next 还没声明
+};
+applyLang(); $('modeMeta').textContent = MODE === 'auto' ? 'Auto length' : MODE.replace('+', ' s + ') + ' s';
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const setMode = m => { document.body.classList.remove('start', 'choosing', 'playing', 'waiting'); document.body.classList.add(m); };
+setMode('start');
+$('stage').style.background = '#000 url(media/poster.jpg?v=1) center/cover';
+const chip = $('liveChip'); const setChip = h => { chip.innerHTML = h; chip.hidden = !h; };
+function toast(t){ const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 2200); }
+const subs = $('subs');
+function showSub(c, who){ if (!c){ subs.innerHTML = ''; subs.classList.remove('you'); return; } subs.classList.toggle('you', who === 'you');
+  subs.innerHTML = (who ? `<div class="who">${who === 'you' ? 'You' : esc(who)}</div>` : '') + (c.en ? `<div class="en">${esc(c.en)}</div>` : '') + (c.zh ? `<div class="zh">${esc(c.zh)}</div>` : ''); }
+function placeSubs(){ subs.style.bottom = document.body.classList.contains('choosing') ? ($('sheet').offsetHeight + 14) + 'px' : ''; }
+addEventListener('resize', placeSubs);
+
+// 一个画面切到另一个：新的先盖上，再停旧的
+function show(el){ const old = front; front = el; el.classList.add('on'); const retire = () => { if (old !== front){ old.classList.remove('on'); old.pause(); } }; requestAnimationFrame(retire); setTimeout(retire, 60); }
+function spare(){ return pool.find(v => v !== front && !v.dataset.keep) || pool.find(v => v !== front); }
+function load(el, src, loop){ el.loop = !!loop; el.muted = !!loop; el.src = src; el.load(); }
+
+let sid = null, next = null, round = 0, busy = false;
+async function api(path, body){ await relayReady; const r = await fetch(API + path, {method: body ? 'POST' : 'GET', headers: {'Content-Type': 'application/json'}, body: body ? JSON.stringify(Object.assign({k: K}, body)) : undefined}); const raw = await r.text(); let j; try { j = JSON.parse(raw); } catch (e){ throw new Error(T('The server hiccuped. Please send again.', '服务刚才没响应，请再发一次')); } if (!r.ok) throw new Error(j.err || r.status); return j; }
+
+(K ? relayReady.then(() => fetch(`${API}/api/ping?k=${encodeURIComponent(K)}`)) : Promise.reject(new Error('nokey'))).then(r => r.json()).then(j => setChip(!j.ok ? '<b>Wrong key</b> · open this page from the test link' : j.vivix_balance === 'insufficient' ? '<b>Vivix balance low</b> · the last submit was rejected (10005); top up the Vivix workspace first' : `<b>Live generation connected</b> · ${esc(j.model)} · ${esc(MODE)} in parallel · director ${esc((j.director || '').split('/').pop())}`))
+  .catch(e => setChip(e.message === 'nokey' ? '<b>Preview</b> · opening only; live scenes need the test link with a key' : '<b>Live generation offline</b> · the relay on the Mac is not reachable right now'));
+
+// 开场
+const ov = pool[1]; load(ov, SRC('media/OPEN.mp4')); const idle = pool[2]; load(idle, SRC('media/IDLE0.mp4'), true);
+if (PAGES) [[ov, 'media/OPEN.mp4'], [idle, 'media/IDLE0.mp4']].forEach(([v, p]) => v.addEventListener('error', () => { if (!v.src.endsWith(p)) { v.src = p; v.load(); } }));
+async function startSession(){ if (!K){ next = PREVIEW_NEXT; return; } const j = await api('/api/session', {mode: MODE}); sid = j.sid; next = j.next; round = 0; }
+$('startBtn').onclick = async () => {
+  $('startCard').hidden = true; setMode('playing');
+  [pool[0], idle].forEach(v => { const p = v.play(); if (p) p.then(() => { if (v !== front) v.pause(); }).catch(() => {}); });  // 在这次点击里解锁
+  wait.play().then(() => { if (!waitTarget) wait.pause(); }).catch(() => {});
+  startSession().catch(e => setChip('<b>Could not start</b> · ' + esc(e.message)));
+  playOpening();
+};
+let replayFn = null;
+function playOpening(){
+  showSub(null); ov.currentTime = 0; ov.muted = false; ov.loop = false;
+  RT.begin({key: 'OPEN', parts: [{v: ov, d: 72}]}); replayFn = playOpening;
+  ov.play().then(() => show(ov)).catch(() => { show(ov); toast(T('Tap the screen to start', '点一下画面开始')); });
+  ov.ontimeupdate = () => { const t = ov.currentTime; const c = OPEN_CUES.find(q => t >= q.s && t <= q.e); showSub(c || null, c && (c.who === 'Her' ? T('Her', '她') : c.who)); };
+  ov.onended = () => { RT.done('OPEN'); RT.clear(); ov.ontimeupdate = null; idle.currentTime = 0; idle.play().catch(() => {}); show(idle); openChoice(); };
+}
+$('mRestart').onclick = () => { $('menu').hidden = true; replayFn = null; closeChoice(); $('liveWait').hidden = true; liveRun++; busy = false; setMode('playing'); startSession().catch(() => {}); load(idle, SRC('media/IDLE0.mp4'), true); playOpening(); };
+$('menuBtn').onclick = () => { const m = $('menu'); m.hidden = !m.hidden; };
+$('mLang').onclick = () => { lang = lang === 'en' ? 'zh' : 'en'; Q.set('lang', lang); history.replaceState(null, '', '?' + Q.toString()); applyLang(); $('menu').hidden = true; };
+
+// 选择点：导演层上一轮给的两个选项 + 输入框
+const opt = o => `<span class="en">${esc(o.en)}</span><span class="zh">${esc(o.zh)}</span>`;
+async function openChoice(){
+  setMode('choosing'); $('shade').classList.add('deep'); waitMusic(true); RT.clear();
+  $('replayBtn').hidden = !replayFn; $('replayBtn').textContent = T('↺ Replay', '↺ 重看这一段');
+  for (let i = 0; i < 100 && !next; i++) await new Promise(r => setTimeout(r, 100));
+  if (!next){ setChip('<b>No options received</b> · the local relay did not respond'); return; }
+  fillChoice();
+  $('optA').onclick = () => liveRound('option', 'A', next.A); $('optB').onclick = () => liveRound('option', 'B', next.B);
+  $('sayIn').value = ''; $('sayBtn').disabled = false;
+  setTimeout(() => { $('sheet').classList.add('show'); placeSubs(); }, 150);
+}
+function fillChoice(){
+  $('rno').textContent = T(`Scene ${round + 1}`, `第 ${round + 1} 幕`);
+  $('cue').innerHTML = `${esc(next.cue.en)}<span class="zh">${esc(next.cue.zh)}</span>`;
+  $('optA').innerHTML = opt(next.A); $('optB').innerHTML = opt(next.B);
+}
+$('replayBtn').onclick = () => { if (!replayFn || busy) return; closeChoice(); $('shade').classList.remove('deep'); waitMusic(false); setMode('playing'); replayFn(); };
+function closeChoice(){ $('sheet').classList.remove('show'); subs.style.bottom = ''; $('shade').classList.remove('deep'); }
+$('say').addEventListener('submit', e => { e.preventDefault(); const raw = $('sayIn').value.trim(); if (!raw || busy) return; liveRound('free', null, {zh: raw, en: raw}); });
+
+// 一轮：发出去 → 等导演层和两段生成 → 两段都好、都缓冲好 → 一次连续播完 → 下一个选择点
+let liveRun = 0;
+async function liveRound(kind, choice, said){
+  if (!K){ toast(T('Live scenes need the test link with a key', '实时生成需要带口令的测试链接')); return; }
+  if (busy) return; busy = true; const my = ++liveRun, t0 = Date.now(); let r = null, rid = null;
+  closeChoice(); setMode('waiting'); waitMusic(true); showSub(null);
+  const herLine = lang === 'en' ? (said.en || said.zh) : (said.zh || said.en);
+  $('lwH').textContent = T('You: ', '你：') + herLine;
+  const phase = () => !r ? T('Sending…', '发送中…') : r.status === 'keyframe' ? T('Setting up the next moment…', '正在准备下一刻的画面…') : r.status === 'submitted' ? (kind === 'option' ? T('Reading the storyboard for this choice…', '读取这个选项预先写好的分镜…') : T('Writing his reply…', '导演层在写他的回话…')) : r.status === 'error' ? T('Generation failed', '生成失败')
+    : (r.segs && r.segs[0] && r.segs[0].url && r.segs[1] && !r.segs[1].url) ? T(`Part 1 ready · part 2 in ~${(r.segs[1].eta_left || 0).toFixed(0)} s, timing the start so both play straight through`, `第 1 段好了 · 第 2 段约 ${(r.segs[1].eta_left || 0).toFixed(0)} 秒后好，算好时间开播，两段接着播`)
+    : T(`Generating both parts at once (${r.mode.replace('+', ' s + ')} s) · ${(r.segs || []).filter(s => s.url).length}/2 ready`, `两段同时生成中（${r.mode.replace('+', ' 秒 + ')} 秒）· 已完成 ${(r.segs || []).filter(s => s.url).length}/2`);
+  const hold = (label, cond) => new Promise(res => { $('liveWait').hidden = false; (function f(){ if (my !== liveRun) return; $('lwT').textContent = ((Date.now() - t0) / 1000).toFixed(1); $('lwS').textContent = label || phase(); if (cond()){ res(); } else setTimeout(f, 100); })(); });
+  try { rid = (await api('/api/round', {sid, kind, choice, input: kind === 'free' ? said.zh : undefined})).id; }
+  catch (e){ $('liveWait').hidden = true; busy = false; setChip('<b>Not sent</b> · ' + esc(e.message)); toast(T('Live generation unavailable', '实时生成不可用')); openChoice(); if (kind === 'free') $('sayIn').value = said.zh; return; }
+  const V = [spare()]; V[0].dataset.keep = 1; V.push(spare()); delete V[0].dataset.keep;
+  const poll = setInterval(async () => {
+    try { r = await api(`/api/round/${rid}?k=${encodeURIComponent(K)}`); } catch (e) {}
+    if (r && r.segs) r.segs.forEach((s, i) => { if (s.url && V[i].dataset.src !== s.url){ V[i].dataset.src = s.url; load(V[i], s.url); } });  // 一到就预载
+  }, 500);
+  // V1.5 提速：第 1 段不等第 2 段出片——按第 2 段的预计出片时间（中转给的 eta_left）倒推开播，第 1 段播完正好接上第 2 段
+  const LOCAL = location.hostname === '127.0.0.1', M = LOCAL ? 1.5 : 3.0;  // 轮询、隧道延迟和第 2 段从 Vivix CDN 缓冲的余量（秒）
+  const segErr = () => r && r.segs && r.segs.some(s => s.status === 'error');
+  const seg1Ok = () => r && r.segs && r.segs[0] && r.segs[0].url && V[0].dataset.src === r.segs[0].url && V[0].readyState >= 3;
+  const seg2Soon = () => { const s2 = r.segs[1]; if (!s2 || s2.url) return true; const d1 = (V[0].duration || r.segs[0].dur || 5) / RT.speed(); return s2.eta_left != null && s2.eta_left <= d1 - M - (s2.dur >= 15 ? 1.5 : 0); };
+  await hold(null, () => (r && r.status === 'error') || segErr() || (seg1Ok() && seg2Soon()));
+  if (my !== liveRun){ clearInterval(poll); return; }
+  const view = {};
+  if (!segErr() && r.status !== 'error'){
+    $('liveWait').hidden = true; waitMusic(false); setMode('playing');
+    view.play_at = Date.now(); view.seg2_eta = r.segs[1] ? r.segs[1].eta_left : null;
+    RT.begin({key: 'round:' + rid, mix: r.mix, parts: r.segs.map((x, i) => ({v: V[i], d: x.dur || x.seconds})), label: T(`Scene ${round + 1}`, `第 ${round + 1} 幕`)}); RT.part(0);
+    await play(0); view.seg1_end = Date.now();
+    const ok2 = () => segErr() || (r.segs[1].url && V[1].dataset.src === r.segs[1].url && V[1].readyState >= 3);
+    if (!ok2()){ waitMusic(true); while (!ok2() && my === liveRun) await new Promise(res => setTimeout(res, 100)); waitMusic(false); }  // 第 2 段还没到：停在第 1 段最后一帧
+    view.stall = (Date.now() - view.seg1_end) / 1000;
+    if (my === liveRun && !segErr()){ RT.part(1); await play(1); RT.done('round:' + rid); }
+  }
+  clearInterval(poll); view.end_at = Date.now(); $('liveWait').hidden = true;
+  if (rid) api(`/api/round/${rid}/view`, view).catch(() => {});
+  const gen = r.segs && r.segs.every(s => s.ready_at) ? Math.max(...r.segs.map(s => s.ready_at - r.director_at)) / 1000 : null;
+  const dir = r.director_at ? (r.director_at - r.at) / 1000 : null;
+  busy = false;
+  if (!view.play_at || segErr()){ const low = (r.segs || []).some(s => s.err_code === 10005); setChip(low ? '<b>Vivix balance low</b> · this scene was not generated (10005). Top up the Vivix workspace, then choose or send again here' : `<b>This scene failed</b> · ${esc((r.segs || []).map(s => s.err).filter(Boolean)[0] || r.err || '')} · you can choose again`); if (low) toast(T('Vivix balance low', 'Vivix 余额不足')); openChoice(); return; }
+  setChip(`<b>Scene ${round + 1}</b> · ${esc(r.mode)} · send to play ${((view.play_at - t0) / 1000).toFixed(1)}s (director ${dir == null ? '—' : dir.toFixed(1)}s${r.director === 'prefetched' ? ' prefetched' : ''} + part 1 ${r.segs[0].ready_at ? ((r.segs[0].ready_at - r.director_at) / 1000).toFixed(1) : '—'}s, part 2 ${gen == null ? '—' : gen.toFixed(1)}s) · seam pause ${(view.stall || 0).toFixed(1)}s`);
+  const sceneNo = round + 1;
+  replayFn = () => {  // 重看：看过了，可以随意拖；两段之间拖动时直接跳到那一段
+    const go = (j, t) => { const v = V[j]; subsFor(j, v); v.currentTime = t; v.muted = false; v.loop = false; v.onended = () => { v.ontimeupdate = null; showSub(null); if (j + 1 < V.length){ RT.part(j + 1); go(j + 1, 0); } else { v.onended = null; RT.clear(); openChoice(); } }; v.play().then(() => show(v)).catch(() => {}); };
+    RT.begin({key: 'round:' + rid, mix: r.mix, free: true, parts: r.segs.map((x, i) => ({v: V[i], d: x.dur || x.seconds})), label: T(`Scene ${sceneNo}`, `第 ${sceneNo} 幕`), jump: (j, t) => { V.forEach(x => { if (x !== V[j]){ x.pause(); x.onended = null; x.ontimeupdate = null; } }); go(j, t); }});
+    go(0, 0);
+  };
+  round++; next = r.next || next; openChoice();
+
+  function subLine(i, v){
+    const Lns = (r.lines['seg' + (i + 1)] || []).filter(Boolean), Z = ((r.zh || {})['seg' + (i + 1)] || []).filter(Boolean), off = i === 1 ? 2 : 0;  // 第 2 段前 2 秒是静止承接
+    return () => { const d = v.duration || r.segs[i].seconds; const LT = (r.line_times || {})['seg' + (i + 1)]; if (LT){ const c = LT.find(x => v.currentTime >= x.s && v.currentTime <= x.e); if (c) showSub({en: c.en, zh: c.zh || ''}, c.who === '她' ? T('Her', '她') : c.who); else showSub(null); } else if (Lns.length){ const t = Math.max(0, v.currentTime - off); const k = Math.min(Lns.length - 1, Math.floor(t / (d - off) * Lns.length)); showSub({en: Lns[k], zh: Z[k] || ''}, 'Rian'); } };
+  }
+  function subsFor(i, v){ const f = subLine(i, v); v.ontimeupdate = f; }
+  function play(i){ return new Promise(res => {
+    const v = V[i];
+    v.currentTime = 0; v.muted = false; v.loop = false; let done = false;
+    const end = () => { if (done) return; done = true; v.ontimeupdate = null; showSub(null); res(); };
+    const sub1 = subLine(i, v);
+    v.ontimeupdate = () => { if (my !== liveRun){ end(); return; } sub1(); const d = v.duration || r.segs[i].seconds; if (d && v.currentTime >= d - 0.06) end(); };
+    v.onended = end; v.onerror = end;
+    v.play().then(() => show(v)).catch(() => { v.muted = true; v.play().then(() => show(v)).catch(end); });
+  }); }
+}
+})();
+</script>
