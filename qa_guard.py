@@ -195,7 +195,7 @@ def hard_check(mp4, people, wear='', timeout=20):
     with tempfile.TemporaryDirectory() as d:
         subprocess.run([L.FFMPEG, '-v', 'error', '-y', '-i', str(mp4), '-vf', 'fps=1.0,scale=320:-2', '-q:v', '5', d + '/%02d.jpg'], check=True)
         fr = [base64.b64encode(p.read_bytes()).decode() for p in sorted(Path(d).glob('*.jpg'))]
-    t0 = time.time(); content = [{'type': 'text', 'text': HARD_CHECK.format(n=len(fr), people=people, wear=(f'- clothes：男主、女主这时应该穿着：{wear}。画面里的其他人（配角）穿的是他们自己的衣服，和女主不一样是正常的，不按男主女主的衣服查他们。一眼就能看出的颜色错误才报，比如灰色 T 恤变成白色、一条裙子变了颜色。深浅差一点、款式细节、光线造成的差异都不报。\n' if wear else '衣服颜色和款式也不报。'))}] + [{'type': 'image_url', 'image_url': {'url': 'data:image/jpeg;base64,' + b}} for b in fr]
+    t0 = time.time(); content = [{'type': 'text', 'text': HARD_CHECK.format(n=len(fr), people=people, wear=(f'- clothes：男主、女主这时应该穿着：{wear}。画面里的其他人（配角）穿的是他们自己的衣服，和女主不一样是正常的，不按男主女主的衣服查他们。一眼就能看出的颜色错误才报，比如灰色 T 恤变成白色、一条裙子变了颜色。深浅差一点、款式细节、光线造成的差异都不报；纹身、项链、皮肤和发型不是衣服，不报。\n' if wear else '衣服颜色和款式也不报。'))}] + [{'type': 'image_url', 'image_url': {'url': 'data:image/jpeg;base64,' + b}} for b in fr]
     def ask(model):
         body = {'model': model, 'max_tokens': 600, 'messages': [{'role': 'user', 'content': content}]}
         req = U.Request('https://openrouter.ai/api/v1/chat/completions', data=json.dumps(body).encode(), headers={'Authorization': 'Bearer ' + director._key(), 'Content-Type': 'application/json'})

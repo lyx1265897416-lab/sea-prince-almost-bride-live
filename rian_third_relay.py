@@ -9,7 +9,7 @@ POST /api/round   {k, sid, kind, choice, input}    → {id}              kind=op
 GET  /api/round/<id>?k=…                           → 状态、两段视频地址、台词字幕、下一轮选项、各阶段时刻（毫秒）
 POST /api/round/<id>/view {k, play_at, seg1_end, stall, end_at, buffer}  网页回报实际开播时刻和接缝
 用法：rian_third_relay.py <口令> [端口，默认 8908]"""
-import json, os, re, subprocess, sys, threading, time, uuid
+import json, os, re, shutil, subprocess, sys, threading, time, uuid
 from concurrent.futures import ThreadPoolExecutor
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
@@ -49,7 +49,7 @@ def persist(path):
     if not m: raise RuntimeError((r.stdout + r.stderr)[-200:])
     return m.group(1)
 
-OPEN_STATE = '开场那天清晨，海下王宫的东廊。Rian 站在画面左侧，她站在画面右侧，两人并肩站着、身体侧向对方，相距半臂；她刚从海里出来，橙红色长发和衣服湿透；摄政官维萨拿着深蓝册子站在画面左后方。她跳海去救被潮水卷走的好友米拉，被他救进王宫；维萨说未登记的访客会被扣留、关于这里的记忆会被封存；他刚当着维萨说她是他未来的新娘，低头看着她，等她的反应。她还没回答。隐藏真相她还不知道：“未婚妻”是他临时编的，普通担保和通行证其实存在。'
+OPEN_STATE = '开场那天清晨，海下王宫的东廊。Rian 站在画面左侧，她站在画面右侧，两人并肩站着、身体侧向对方，相距半臂；她刚从海里出来，橙红色长发和衣服湿透；摄政官 Vessa 拿着深蓝册子站在画面外左侧（这一刻画面里只有他们两人，Vessa 只有声音，要正面出镜只能放在 seg2 并写进 cast）。她跳海去救被潮水卷走的好友米拉，被他救进王宫；维萨说未登记的访客会被扣留、关于这里的记忆会被封存；他刚当着维萨说她是他未来的新娘，低头看着她，等她的反应。她还没回答。隐藏真相她还不知道：“未婚妻”是他临时编的，普通担保和通行证其实存在。'
 OPEN_NEXT = {'cue': {'zh': '他说完了，低头看着她，等她的回答。', 'en': 'He said it. Now he looks down at her, waiting for her answer.'},
              'A': {'zh': '先配合他，找朋友要紧。', 'en': 'Play along—for now.', 'leads_to': 'K02：他低声让她先配合、保证带她去找米拉，维萨暂时放行'},
              'B': {'zh': '当场反问：谁是你的新娘？', 'en': 'Call his bluff: whose bride?', 'leads_to': 'K02：他面不改色接住，维萨冷冷合上册子放行'}}
@@ -84,7 +84,9 @@ def speculate(s):
     """选择点一出现：在后台把 A/B 两个选项的 spec 先写好（同一份剧情记录和状态）。"""
     gen = s['gen']; s['spec_cache'] = {}
     for k in ('A', 'B'):
-        opt = s['next'][k]; text = opt['zh'] or opt['en']
+        opt = (s.get('next') or {}).get(k)
+        if not isinstance(opt, dict) or not (opt.get('zh') or opt.get('en')): continue  # 少了一个选项也不让整轮失败
+        text = opt.get('zh') or opt.get('en')
         fut = POOL.submit(director.direct, list(s['history']), s['state'], text, 'option', s['mode'], place=s.get('place'), place_rounds=s.get('place_rounds', 0), done=tuple(s.get('cards', [])), stall=s.get('stall', 0), set_now=s.get('set'), persona=s.get('persona'), wardrobe=dict(s.get('wardrobe') or {}), cont=cont_of(s))
         s['spec_cache'][k] = {'fut': fut, 'text': text, 'at': now(), 'gen': gen}
 
@@ -118,13 +120,35 @@ def crop_close(jpg, fb, target=0.34):
     tmp.replace(jpg)
 
 
+DL = {}  # V3.3：url → 本机文件，同一段只下载一次（原来开播前检查、段内快检、末帧各下一次）
+
+
+def fetch(url, dest, parts=6):
+    """V3.3：成片分 6 段并行下载、不走代理。S015323dc3 生成只要 20–30 秒，单线程下载 8 MB 却花了 55–190 秒（开播 269 秒）；并行实测快约 3 倍。失败退回整段下载。"""
+    dest = Path(dest); c = DL.get(url)
+    if c and Path(c).exists(): shutil.copyfile(c, dest); return dest
+    op = U.build_opener(U.ProxyHandler({}))
+    try:
+        r = op.open(U.Request(url, headers={'Range': 'bytes=0-0'}), timeout=20); size = int(r.headers['Content-Range'].split('/')[-1]); r.read()
+        step = size // parts + 1
+        def part(k): return op.open(U.Request(url, headers={'Range': f'bytes={k * step}-{min(size, (k + 1) * step) - 1}'}), timeout=90).read()
+        with ThreadPoolExecutor(parts) as ex: data = b''.join(ex.map(part, range(parts)))
+        if len(data) != size: raise IOError(f'size {len(data)} != {size}')
+        dest.write_bytes(data)
+    except Exception as e:
+        log('FETCH fallback', str(e)[:80]); U.urlretrieve(url, dest)
+    keep = FR / f'dl_{uuid.uuid5(uuid.NAMESPACE_URL, url).hex}.mp4'; shutil.copyfile(dest, keep); DL[url] = str(keep)
+    for u, p in list(DL.items())[:-12]: Path(p).unlink(missing_ok=True); DL.pop(u, None)
+    return dest
+
+
 def prepare_frame(s, rid, seg2_url):
     """上一轮第 2 段的最后一帧 → 下一轮第 1 段的首帧和第 2 段的参考图。
     末帧里看不到他的脸（插入特写收尾）就往前 1.5、3、5 秒再找；质检没有严重问题时原图放进 frame_raw，下一轮最多等 FIX_WAIT 秒；有严重问题必须等修图完成。"""
     try:
         mp4 = FR / f'{rid}_2.mp4'; jpg = FR / f'{rid}_last.jpg'
         if seg2_url.startswith('/'): mp4.write_bytes((SITE / seg2_url.lstrip('/')).read_bytes())  # 校色后的第 2 段在本机
-        else: U.urlretrieve(seg2_url, mp4)
+        else: fetch(seg2_url, mp4)
         try:  # V1.5 提速：先抽一张没查过的末帧传上去，下一轮发送时质检、修图还没好就用它（不等）
             q0 = FR / f'{rid}_last_quick.jpg'
             subprocess.run([L.FFMPEG, '-v', 'error', '-y', '-sseof', '-0.15', '-i', str(mp4), '-frames:v', '1', '-q:v', '2', str(q0)], check=True)
@@ -242,6 +266,12 @@ def seg_eta(r, i):
     return round(g0 + GAP + P2 + PAD, 1)
 
 
+def outfit_ref(rid):
+    """V3.5（S034241cf8 第 5、6 轮他赤裸上身，第 2 段还带着穿夹克的服装母版，他的脸变年轻、变成另一种画风）：他没穿上衣时，服装母版换成他的头像，只锁脸。"""
+    he = str((((R[rid].get('spec') or {}).get('wardrobe_end')) or {}).get('he', ''))
+    return qa_guard.HE_HEAD if re.search('赤裸|光着|裸着|没穿上衣', he) else qa_guard.OUTFIT_URL
+
+
 def run_seg(rid, i, dur, prompt, first, frame_url, face_url, extra=(), no_scene=False):
     s = R[rid]['segs'][i]
     kw = dict(prompt=prompt, duration=dur, aspect_ratio='9:16')
@@ -253,8 +283,8 @@ def run_seg(rid, i, dur, prompt, first, frame_url, face_url, extra=(), no_scene=
     elif first == 'lock': kw['first_frame_image'] = kw['last_frame_image'] = frame_url  # V0.17：10+10 第 1 段首尾帧都锁成上一刻画面
     elif first or (L.SEG2_FIRST and not extra): kw['first_frame_image'] = frame_url  # v0.11：第 2 段也从同一张首帧出发（参考图模式容易拍成第三人称、出现过肩）
     elif (R[rid].get('spec') or {}).get('wardrobe_changed'): kw['ref_images'] = [frame_url, qa_guard.HE_HEAD, qa_guard.HER_HEAD] + list(extra)[:2] + L.swatch(R[rid]['spec'].get('wardrobe_end'))  # V2.0 只带头像；V1.8：穿着变了不带服装母版和站位母版（它们会把衣服穿回去），穿着看上一刻的画面
-    elif no_scene: kw['ref_images'] = [L.plate_for(R[rid]['spec']) or STAGING_URL, face_url, qa_guard.OUTFIT_URL, HER_URL] + list(extra)[:1]  # V3.0：有这个地点的固定空景就用它，不用灰底站位图（不然会漂回上一个地点）  # 换场的第 2 段不带旧地点的画面：带了模型会在最后一拍切回旧地点（v0.15 第 3 轮）
-    else: kw['ref_images'] = [frame_url, face_url, qa_guard.OUTFIT_URL, HER_URL] + list(extra)[:1] + ([L.plate_for(R[rid]['spec'])] if not extra and L.plate_for(R[rid]['spec']) else [])  # V3.0：没有配角时第 5 张带上这个地点的空景  # Vivix 最多 5 张  # 有配角出镜时仍用参考图带上她的身份母版
+    elif no_scene: kw['ref_images'] = [L.plate_for(R[rid]['spec']) or STAGING_URL, face_url, outfit_ref(rid), HER_URL] + list(extra)[:1]  # V3.0：有这个地点的固定空景就用它，不用灰底站位图（不然会漂回上一个地点）  # 换场的第 2 段不带旧地点的画面：带了模型会在最后一拍切回旧地点（v0.15 第 3 轮）
+    else: kw['ref_images'] = [frame_url, face_url, outfit_ref(rid), HER_URL] + list(extra)[:1] + ([L.plate_for(R[rid]['spec']) if not (i == 0 and (R[rid].get('spec') or {}).get('scene_changed')) else L.plate_for({'location': R[rid].get('place_before') or ''})] if not extra and (L.plate_for(R[rid]['spec']) if not (i == 0 and (R[rid].get('spec') or {}).get('scene_changed')) else L.plate_for({'location': R[rid].get('place_before') or ''})) else [])  # V3.4：换场那一轮第 1 段还在旧地点，带旧地点（place_before）的空景，不带新地点的（人鱼王子 11-04：会客厅那段带了潮门空景漂成别的大厅；什么都不带又漂成水下）  # V3.0：没有配角时第 5 张带上这个地点的空景  # Vivix 最多 5 张  # 有配角出镜时仍用参考图带上她的身份母版
     if i == 1 and L.TU.get('vehicle') and 'ref_images' in kw and len(kw['ref_images']) < 5 and any(L.RIDE_ON.search(str(b[0])) for b in (R[rid].get('spec') or {}).get('seg2') or []): kw['ref_images'] = kw['ref_images'] + [L.TU['vehicle']]  # V2.3：摩托每轮款式都在变
     def gen(body):
         cli = C2 if (i == 1 and C2) else c; sub = W1Client(api_key=os.environ['VIVIX_API_KEY_2'], max_retries=0) if cli is C2 else W1Client(max_retries=0); job = None  # V3.1：第 2 段走第二个工作区
@@ -295,18 +325,20 @@ def run_seg(rid, i, dur, prompt, first, frame_url, face_url, extra=(), no_scene=
     try:
         job = gen(c.build(**kw)); s['gen_ready_at'] = now()
         sp_hc = R[rid].get('spec') or {}; looks = lambda txt, n: re.sub(r'^[^：]{0,12}：', '', str(txt or ''))[:n]  # V3.0：每个人带一句外形，检查模型才分得清谁是女主、谁是配角（三真四假 S2351533a4 把 Sloane 的蓝裙子当成女主的裙子变色）
-        names = [f'男主（{looks(L.HE_LOOK, 50)}）', f'女主（{looks(L.HER, 90)}）'] + [f'{c}（{looks(L.CAST[c][0], 110)}）' if c in L.CAST else c for c in (sp_hc.get('cast') or [])] + [x['name'] for x in (sp_hc.get('extras') or []) if isinstance(x, dict) and x.get('name')]  # V2.7：每一轮每一段都查，不合格重新生成，最多三次，都不合格就拦下
+        names = [f'男主（{looks(L.HE_LOOK, 50)}）', f'女主（{looks(L.HER, 90)}）'] + [f'{c}（{looks(L.CAST[c][0], 110)}）' if c in L.CAST else c for c in (sp_hc.get('cast') or []) if not (c in L.CAST and hasattr(L, 'on_screen') and not any(L.on_screen(c, b) for b in (sp_hc.get(f'seg{i + 1}') or [])))] + [x['name'] for x in (sp_hc.get('extras') or []) if isinstance(x, dict) and x.get('name')]  # V3.3：只按这一段画面里的配角查（只出声的不算，出现就是多人）；V2.7：每一轮每一段都查，不合格重新生成，最多三次，都不合格就拦下
         people = f"{len(names)} 个人：{'；'.join(names)}" + ('；背景远处的路人不算' if re.search('酒吧|餐厅|夜宵|摊|街|人群|派对', str(sp_hc.get('set') or '')) else '') + ('；这一段他会变身成狼，不算错误' if sp_hc.get('wolf') else '')
-        w_hc = sp_hc.get('wardrobe_end') or {}; wear = f"男主：{w_hc.get('he') or L.HE_DEFAULT}；女主：{w_hc.get('she') or L.SHE_DEFAULT}"  # 只查第 2 段：第 1 段可能正在穿脱
+        w_hc = sp_hc.get('wardrobe_end') or {}; w0_hc = sp_hc.get('wardrobe_start') or {}
+        wear = f"男主：{w_hc.get('he') or L.HE_DEFAULT}；女主：{w_hc.get('she') or L.SHE_DEFAULT}" if i == 1 else '；'.join(x for x in ((f"男主：{w0_hc.get('he') or L.HE_DEFAULT}" if w0_hc.get('he') == w_hc.get('he') else ''), (f"女主：{w0_hc.get('she') or L.SHE_DEFAULT}" if w0_hc.get('she') == w_hc.get('she') else '')) if x)  # V3.4：第 1 段也查，只查这一轮没换装的人（Rafael 11-04 第 4 轮第 1 段他的牛仔裤变成黑裤）
         magic = re.search('飞|魔法|悬浮|漂浮|超能力|变身|穿越', str(R[rid].get('input') or ''))
         for tn in range(3):
             hcf = FR / f'{rid}_{i + 1}_hc.mp4'
-            try: U.urlretrieve(job['video_url'], hcf); hc = qa_guard.hard_check(hcf, people, wear if i == 1 else '')
+            try: fetch(job['video_url'], hcf); hc = qa_guard.hard_check(hcf, people, wear)
             except Exception as e: hc = {'bad': False, 'kinds': [], 'err': str(e)[:120]}
             hcf.unlink(missing_ok=True); s.setdefault('hard_check', []).append(hc); log('HARDCHECK', rid, i + 1, tn, json.dumps(hc, ensure_ascii=False)[:200])
             kinds = set(hc.get('kinds') or []) or ({'people'} if hc.get('bad') else set())
             if magic: kinds.discard('motion')  # 她自己要飞、要魔法时不算
             if kinds == {'clothes'} and sp_hc.get('cast'): s['clothes_cast_ignored'] = s.get('clothes_cast_ignored', 0) + 1; kinds = set()  # V3.1：有配角在画面里时，只报衣服颜色的不重生成、只记录（S231920f01、S00530299f 都是把 Sloane 的蓝裙当成女主裙子变色，每次多等约 25 秒）
+            if i == 0 and kinds and hc.get('frames') and set(hc['frames']) <= {1}: s['first_frame_issue'] = hc.get('why'); kinds = set()  # V3.3：第 1 段第 1 帧就是上一轮末帧，重生成改不掉（S0209398d1 第 3 轮“第 1 帧边缘多一只手”连拦两次后报错），只记录
             if not kinds: break
             if tn == 2: raise RuntimeError('这段画面没有通过检查，已拦下，请再发送一次')
             s['gate_regen'] = tn + 1; job = gen(c.build(**kw)); s['gen_ready_at'] = now()
@@ -317,7 +349,7 @@ def run_seg(rid, i, dur, prompt, first, frame_url, face_url, extra=(), no_scene=
         def bg_qa(u=job['video_url'], jid=s.get('job_id')):  # V1.5 提速：段内快检移出等待路径，只记录，不再重生成。V2.2：状态复查也只记录（挡开播时加 12 秒，重生成再加 30–45 秒，3 次触发都是半躺算不算躺这种误报）
             mp4 = FR / f'{rid}_{i + 1}_q0.mp4'
             try:
-                U.urlretrieve(u, mp4); q = qa_guard.seg_check(mp4, cast=cast, props=props)
+                fetch(u, mp4); q = qa_guard.seg_check(mp4, cast=cast, props=props)
                 if st_seg: s['state_check'] = qa_guard.seg_state(mp4, st_seg); log('SEGSTATE', rid, i + 1, 'logged', json.dumps(s['state_check'], ensure_ascii=False)[:200])
             except Exception as e: q = {'regen': False, 'err': str(e)[:160]}; log('SEGQAFAIL', rid, i + 1, e)
             s.setdefault('seg_qa', []).append(dict(q, job=jid)); save(rid)
@@ -606,7 +638,7 @@ class H(BaseHTTPRequestHandler):
             s = new_session(mode); s['persona'] = str(body.get('persona') or '')[:1500] or None
             rc = str(body.get('recap') or '').strip()[:2000]
             if rc:  # V3.2：换搭档——从另一条线带着前情过来（三真四假重新配对仪式）。前情写进当前状态和剧情记录，已演过的关键片段卡照算
-                s['state'] = rc; s['history'] = [{'input': '（换搭档之前的剧情）', 'kind': 'option', 'lines': [], 'did': rc, 'opts': [], 'place': s.get('place'), 'input_type': 'direction', 'delivered': True}]
+                s['state'] = rc; s['history'] = [{'input': '（换搭档之前的剧情）', 'kind': 'option', 'lines': [], 'did': rc, 'opts': [], 'place': s.get('place'), 'input_type': 'direction', 'delivered': True, 'span': max(1, min(20, int(body.get('rounds') or 1)))}]
                 s['cards'] = [str(k).strip().upper() for k in (body.get('cards') or []) if re.fullmatch(r'K\d{2}', str(k).strip().upper())][:20]; s['recap'] = True
             return self.out(200, {'sid': s['sid'], 'next': s['next'], 'mode': mode})
         if self.path.startswith('/api/round/') and self.path.endswith('/view'):
