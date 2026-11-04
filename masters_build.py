@@ -19,7 +19,8 @@ crop(REF / 'sea-rian--front.png', M / 'he-head.jpg', 0, .5, .1, .9)
 crop(R / 'SKYW6-frame.png', M / 'her-head.jpg', .48, .76, .18, .82)
 crop(R / 'SKYW6-frame.png', M / 'she-full.jpg', 0, .47, 0, .36)
 for k, src in {'he-face': REF / 'sea-rian--front.png', 'he-outfit': REF / 'lib-RIA-master.png', 'her-sheet': R / 'SKYW6-frame.png', 'staging': R / 'RT_staging-frame.png',
-               'open-key': R / 'WV23v-frame.png', 'vessa': R / 'RT_vessa-frame.png', 'mila': R / 'RT_mila-frame.png'}.items():
+               'open-key': R / 'WV23v-frame.png', 'vessa': R / 'RT_vessa-frame.png', 'mila': R / 'RT_mila2-frame.png',
+               'plate-gallery': R / 'RT_plate_gallery-frame.png', 'plate-gate': R / 'RT_plate_gate-frame.png', 'plate-lounge': R / 'RT_plate_lounge-frame.png', 'plate-suite': R / 'RT_plate_suite-frame.png'}.items():
     Image.open(src).convert('RGB').save(M / f'{k}.jpg', quality=93)
 subprocess.run([FF, '-y', '-v', 'error', '-sseof', '-0.15', '-i', str(OPEN), '-frames:v', '1', '-q:v', '2', str(M / 'idle-key.jpg')], check=True)
 shutil.copy(M / 'idle-key.jpg', M / 'open-last.jpg')
@@ -33,3 +34,6 @@ c = W1Client(); U = json.loads(F.read_text()) if F.exists() else {}
 for key, f in {'face': 'he-face.jpg', 'face_head': 'he-head.jpg', 'outfit': 'he-outfit.jpg', 'her': 'her-sheet.jpg', 'her_head': 'her-head.jpg', 'staging': 'staging.jpg',
                'open_key': 'open-key.jpg', 'vessa': 'vessa.jpg', 'mila': 'mila.jpg', 'look_she_on': 'she-full.jpg', 'idle_key': 'idle-key.jpg'}.items():
     U[key] = c.upload(str(M / f))['url']; F.write_text(json.dumps(U, indent=1)); print(key, U[key], flush=True)
+# 地点空景（V3.0 plates）：这一轮地点对上关键词就当地点参考，防止第 1 段背景漂移（11-04 冒烟第 1 段东廊漂成海水和亮白大厅）；米拉母版不带相机（相机被收走，归还时再作为道具出现）
+PL = {'东廊|长廊|走廊|回廊': 'plate-gallery.jpg', '潮门|水上台阶|台阶|洞穴': 'plate-gate.jpg', '会客厅|客厅|沙发': 'plate-lounge.jpg', '套房|卧室|床|水池': 'plate-suite.jpg'}
+U['plates'] = {k: c.upload(str(M / f))['url'] for k, f in PL.items()}; F.write_text(json.dumps(U, indent=1, ensure_ascii=False)); print('plates', U['plates'])

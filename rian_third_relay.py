@@ -32,6 +32,7 @@ STAGING_URL = TU['staging']  # 两人站位母版（男左女右，灰底），�
 OPEN_FRAME = D / 'masters' / 'open-key.jpg'  # 开场确认版（外国人版 v9，71.9 秒，停在斯凯抬头看他的近景）之后切到这一张第三视角关键帧接着演：东廊里的双人中近景，男左女右并肩站着，两张脸都看得到
 MAX_ROUNDS = 200
 c = W1Client(); POOL = ThreadPoolExecutor(6)
+C2 = W1Client(api_key=os.environ['VIVIX_API_KEY_2']) if os.environ.get('VIVIX_API_KEY_2') else None  # V3.1：第二个 Vivix 工作区（~/.config/vicky-realtime/env 里写 VIVIX_API_KEY_2）。有它时第 2 段交到这个工作区，两段真正同时生成；没有时照旧串行
 now = lambda: int(time.time() * 1000)
 LOCK = threading.Lock()
 VIVIX = {'balance': 'unknown', 'at': None, 'err': None}  # Vivix 没有查余额接口：按每次提交的结果判断，10005 = 工作区余额不足
@@ -225,7 +226,7 @@ def seg_eta(r, i):
     if x.get('status') == 'error': return None
     if (r.get('model') or MODEL) != 'vivix-w1-ultrafast' or int(x.get('dur') or 15) != 15 or str(r.get('mode')) != '15+15':
         e = FP.eta_left(x, r.get('model') or MODEL); return None if e is None else round(e + (x.get('qa_pad') or 0), 1)
-    now = time.time() * 1000; P1, P2, GAP, PAD = 16.0, 18.0, 2.0, 9.0
+    now = time.time() * 1000; P1, P2, GAP, PAD = 16.0, 18.0, 2.0, 11.0  # PAD：检查要先把 6–9 MB 的 mp4 从 Vivix 拉到本机（1.4–7.8 秒）再问模型（5–17 秒），11-04 实测中位约 9 秒
     def gen_left(s, p):  # 这一段离生成完还有多久
         if s.get('gen_ready_at'): return 0.0
         if s.get('proc_at'): return max(1.0, (s['proc_at'] - now) / 1000 + p)
@@ -235,6 +236,7 @@ def seg_eta(r, i):
         g = gen_left(x, P1); return None if g is None else round(g + PAD, 1)
     if x.get('gen_ready_at'): return round(max(1.0, (x['gen_ready_at'] - now) / 1000 + PAD), 1)  # 生成完在检查（重生成会重新计时）
     if x.get('proc_at'): return round(gen_left(x, P2) + PAD, 1)
+    if C2: g = gen_left(x, P2); return None if g is None else round(g + PAD, 1)  # 两个工作区：第 2 段不用排在第 1 段后面
     g0 = gen_left(segs[0], P1)
     if g0 is None or not x.get('accepted_at'): return None
     return round(g0 + GAP + P2 + PAD, 1)
@@ -243,7 +245,7 @@ def seg_eta(r, i):
 def run_seg(rid, i, dur, prompt, first, frame_url, face_url, extra=(), no_scene=False):
     s = R[rid]['segs'][i]
     kw = dict(prompt=prompt, duration=dur, aspect_ratio='9:16')
-    if i == 1: s['qa_pad'] = 9  # V3.1：开播前检查提速后（每秒 1 帧，5–8 秒），15 秒段也只留 8 秒；原来 13 秒让第 2 段的预计一直偏大，第 1 段等到第 2 段整段出片才开播（三真四假 S231920f01：开播只比第 2 段出片早 0–1 秒）  # V2.8：15 秒段实测比预计晚 2–10 秒（中位约 4 秒，两段同时在生成），多留 5 秒，宁可晚开播几秒也不在接缝停。V2.7：第 2 段查过才给地址，开播不再按出片时间倒推（第 1 段播完要停 6 秒），也不会播到一半才发现要重新生成
+    if i == 1: s['qa_pad'] = 11  # V3.1：开播前检查提速后（每秒 1 帧，5–8 秒），15 秒段也只留 8 秒；原来 13 秒让第 2 段的预计一直偏大，第 1 段等到第 2 段整段出片才开播（三真四假 S231920f01：开播只比第 2 段出片早 0–1 秒）  # V2.8：15 秒段实测比预计晚 2–10 秒（中位约 4 秒，两段同时在生成），多留 5 秒，宁可晚开播几秒也不在接缝停。V2.7：第 2 段查过才给地址，开播不再按出片时间倒推（第 1 段播完要停 6 秒），也不会播到一半才发现要重新生成
     use = (R[rid].get('spec') or {}).get('use_key'); key = R[rid].get('key_url')
     if first == 'bridge': kw['first_frame_image'] = frame_url; kw['last_frame_image'] = key  # V2.0：首帧上一刻、尾帧关键帧，一镜到底把动作演出来
     elif i == 1 and use == 'bridge': frame_url = key; kw['first_frame_image'] = key  # V2.0：第 2 段从变化之后的样子开始
@@ -255,7 +257,7 @@ def run_seg(rid, i, dur, prompt, first, frame_url, face_url, extra=(), no_scene=
     else: kw['ref_images'] = [frame_url, face_url, qa_guard.OUTFIT_URL, HER_URL] + list(extra)[:1] + ([L.plate_for(R[rid]['spec'])] if not extra and L.plate_for(R[rid]['spec']) else [])  # V3.0：没有配角时第 5 张带上这个地点的空景  # Vivix 最多 5 张  # 有配角出镜时仍用参考图带上她的身份母版
     if i == 1 and L.TU.get('vehicle') and 'ref_images' in kw and len(kw['ref_images']) < 5 and any(L.RIDE_ON.search(str(b[0])) for b in (R[rid].get('spec') or {}).get('seg2') or []): kw['ref_images'] = kw['ref_images'] + [L.TU['vehicle']]  # V2.3：摩托每轮款式都在变
     def gen(body):
-        sub = W1Client(max_retries=0); job = None
+        cli = C2 if (i == 1 and C2) else c; sub = W1Client(api_key=os.environ['VIVIX_API_KEY_2'], max_retries=0) if cli is C2 else W1Client(max_retries=0); job = None  # V3.1：第 2 段走第二个工作区
         tries = 4 if first in ('lock', 'bridge') else (5 if 'ref_images' in kw else 2)  # V1.1：参考图段失败多是几秒内被拒、不扣费，先在参考图模式重提 3 次（保住身份母版），第 5 次才退回首帧  # 第三视角 v1：首尾帧锁这几天大约一半任务在 6–15 秒内 generation_failed（同一请求重提就成功），锁帧段最多重提 3 次
         force_fb = False  # V1.5 提速：参考图段报 request_timeout 是这条提示词在参考图模式下固定失败（同一条换 fast 也失败），不再重提 3 次，下一次直接退回首帧
         for attempt in range(tries):  # 任务本身失败（JobFailed）时自动重提；其余失败直接报
@@ -277,7 +279,7 @@ def run_seg(rid, i, dur, prompt, first, frame_url, face_url, extra=(), no_scene=
             s.update(job_id=jid, accepted_at=now()); save(rid)
             job = None
             for w in range(4):  # 轮询断网不算失败：任务已经建好，继续查同一个 job_id
-                try: job = FP.wait_job(c, jid, s); break  # V1.5：记下排队、开始生成的时刻
+                try: job = FP.wait_job(cli, jid, s); break  # V1.5：记下排队、开始生成的时刻
                 except VivixError as e:
                     if e.code != -1 or w == 3: raise
                     log('WAITRETRY', rid, i + 1, jid, str(e)[:120]); time.sleep(3)
@@ -304,6 +306,7 @@ def run_seg(rid, i, dur, prompt, first, frame_url, face_url, extra=(), no_scene=
             hcf.unlink(missing_ok=True); s.setdefault('hard_check', []).append(hc); log('HARDCHECK', rid, i + 1, tn, json.dumps(hc, ensure_ascii=False)[:200])
             kinds = set(hc.get('kinds') or []) or ({'people'} if hc.get('bad') else set())
             if magic: kinds.discard('motion')  # 她自己要飞、要魔法时不算
+            if kinds == {'clothes'} and sp_hc.get('cast'): s['clothes_cast_ignored'] = s.get('clothes_cast_ignored', 0) + 1; kinds = set()  # V3.1：有配角在画面里时，只报衣服颜色的不重生成、只记录（S231920f01、S00530299f 都是把 Sloane 的蓝裙当成女主裙子变色，每次多等约 25 秒）
             if not kinds: break
             if tn == 2: raise RuntimeError('这段画面没有通过检查，已拦下，请再发送一次')
             s['gate_regen'] = tn + 1; job = gen(c.build(**kw)); s['gen_ready_at'] = now()
@@ -449,7 +452,7 @@ def _worker(rid):
     r['segs'] = [{'dur': d, 'mode': '首尾帧到关键帧' if f == 'bridge' else '首尾帧锁' if f == 'lock' else ('首帧续接' if f else '参考图'), 'status': 'generating'} for d, _, f in segs]; save(rid)
     log('SUBMIT', rid, r['mode'], r['director'], 'director', r['director_wait'], 's')
     th = [threading.Thread(target=run_seg, args=(rid, i, d, p, f, ref_url if f == 'lock' else (frame_url if (f or (L.SEG2_FIRST and not extra)) else ref_url), face_url, extra if i == 1 else (), i == 1 and L.moved(sp, s.get('set') or director.OPEN_SET))) for i, (d, p, f) in enumerate(segs)]
-    if str(r['mode']).startswith('15'):  # V2.8：Vivix 同一工作区基本一次跑一条，等第 1 段开工再交第 2 段，开播才早（别信这段直播 15+15 实测）
+    if str(r['mode']).startswith('15') and not C2:  # V3.1：有第二个工作区就两段同时交。V2.8：Vivix 同一工作区基本一次跑一条，等第 1 段开工再交第 2 段，开播才早（别信这段直播 15+15 实测）
         th[0].start(); t0 = time.time()
         while time.time() - t0 < 30 and not (r['segs'][0].get('proc_at') or r['segs'][0].get('status') in ('ready', 'error')): time.sleep(0.3)
         th[1].start()
@@ -575,8 +578,14 @@ class H(BaseHTTPRequestHandler):
         if q.get('k') != TOKEN: return self.out(403, {'err': 'bad token'})
         rid = path.rsplit('/', 1)[-1]
         if path.startswith('/api/round/') and rid in R:
-            out = {k: v for k, v in R[rid].items() if k not in ('prompts', 'spec')}
+            out = {k: v for k, v in R[rid].items() if k not in ('prompts', 'spec')}; out['state'] = (R[rid].get('spec') or {}).get('state')  # V3.2：换搭档时播放页把这一刻的状态带给另一条线
             out['segs'] = [dict(x, eta_left=seg_eta(R[rid], i)) for i, x in enumerate(R[rid].get('segs') or [])]  # V3.1：第 2 段排在第 1 段后面时按串行估（seg_eta）  # V1.5：播放页按它倒推第 1 段开播
+            return self.out(200, out)
+        if path.startswith('/api/round/') and re.fullmatch(r'L[0-9a-f]{9,}', rid) and (RD / f'{rid}.json').exists():  # 中转重启后内存里没有这一轮：按文件回，没做完的告诉页面重发，别让页面一直等
+            try: rr = json.loads((RD / f'{rid}.json').read_text())
+            except Exception: rr = {'id': rid}
+            out = {k: v for k, v in rr.items() if k not in ('prompts', 'spec')}
+            if rr.get('status') not in ('done', 'error'): out.update(status='error', err='中转刚才重启，这一轮中断了，请再发一次')
             return self.out(200, out)
         self.out(404, {'err': 'not found'})
 
@@ -594,7 +603,12 @@ class H(BaseHTTPRequestHandler):
         if self.path == '/api/session':
             mode = body.get('mode', '5+10')
             if mode not in L.MODES and mode != 'auto': return self.out(400, {'err': 'bad mode'})
-            s = new_session(mode); s['persona'] = str(body.get('persona') or '')[:1500] or None; return self.out(200, {'sid': s['sid'], 'next': s['next'], 'mode': mode})
+            s = new_session(mode); s['persona'] = str(body.get('persona') or '')[:1500] or None
+            rc = str(body.get('recap') or '').strip()[:2000]
+            if rc:  # V3.2：换搭档——从另一条线带着前情过来（三真四假重新配对仪式）。前情写进当前状态和剧情记录，已演过的关键片段卡照算
+                s['state'] = rc; s['history'] = [{'input': '（换搭档之前的剧情）', 'kind': 'option', 'lines': [], 'did': rc, 'opts': [], 'place': s.get('place'), 'input_type': 'direction', 'delivered': True}]
+                s['cards'] = [str(k).strip().upper() for k in (body.get('cards') or []) if re.fullmatch(r'K\d{2}', str(k).strip().upper())][:20]; s['recap'] = True
+            return self.out(200, {'sid': s['sid'], 'next': s['next'], 'mode': mode})
         if self.path.startswith('/api/round/') and self.path.endswith('/view'):
             rid = self.path.split('/')[3]
             if rid not in R: return self.out(404, {'err': 'not found'})

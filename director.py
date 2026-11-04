@@ -12,6 +12,7 @@ PACK = (Path(__file__).resolve().parent / 'pack' / 'rian_pack.json').read_text(e
 # 关键片段卡的推荐轮次（资料包 E 节）；K01 是开场，K11 只在她主动时演
 CARDS = {b['id']: b for b in json.loads(PACK)['beats']}
 CARD_DUE = {'K02': 1, 'K03': 2, 'K04': 3, 'K05': 4, 'K06': 5, 'K07': 6, 'K08': 8, 'K09': 9, 'K10': 10, 'K11': 11, 'K12': 12, 'K13': 14}  # K11 吻戏：每集至少一场
+CARD_DUE = json.loads(PACK).get('due') or CARD_DUE  # V3.2：资料包可以自己定每张卡的推荐轮次（三真四假节目流程快，9 轮走完）
 MODEL = os.environ.get('DIRECTOR_MODEL', 'anthropic/claude-sonnet-5.5')
 
 
@@ -463,7 +464,7 @@ def direct(history, state, text, kind, mode, timeout=60, place=None, place_round
         if attempt == 0 and intimate and sp.get('scene_changed') and not re.search('去|走|回|出门|离开|换|到|阳台|车|楼下|外面|浴室|厨房|客厅|卧室|床|家', text or ''):  # V1.8：亲密进行中自己换了场（第 8、12 轮跑去阳台），这条值得多等一次
             first_bad = ['亲密进行中不换场']; msgs = msgs + [{'role': 'assistant', 'content': txt}, {'role': 'user', 'content': '她没有说要换地方：亲密进行中不换场、不打断。scene_changed 改成 false，就在当前地点继续往下演，其余按原来的规则，重新输出完整 JSON。'}]
             continue
-        bad = lint(sp, m, dict(ask_text=text, he_now=(wardrobe or {}).get('he', ''), she_now=(wardrobe or {}).get('she', ''), must_scene=must_scene, must_card=must_card, seen=seen, place_rounds=place_rounds, must_kiss=must_kiss, n=n, prev_opts=(history[-1].get('opts') if history else None), set_now=set_now, lead=lead, stall=stall, her_said=' '.join([h.get('input') or '' for h in history] + [text or '']), items=cont.get('items') or [], left=cont.get('left') or {}, holding=cont.get('holding') or '', looks=list(cont.get('looks') or []), posture=cont.get('posture') or ''))
+        bad = lint(sp, m, dict(ask_text=text, he_now=(wardrobe or {}).get('he', ''), she_now=(wardrobe or {}).get('she', ''), must_scene=must_scene, must_card=must_card, kind=kind, done=list(done), seen=seen, place_rounds=place_rounds, must_kiss=must_kiss, n=n, prev_opts=(history[-1].get('opts') if history else None), set_now=set_now, lead=lead, stall=stall, her_said=' '.join([h.get('input') or '' for h in history] + [text or '']), items=cont.get('items') or [], left=cont.get('left') or {}, holding=cont.get('holding') or '', looks=list(cont.get('looks') or []), posture=cont.get('posture') or ''))
         if attempt == 0: first_bad = bad
         hard = [x for x in bad if x.startswith('【必改】')]
         if attempt == 0 and hard:  # V2.0：意图和状态连续错了比多等 10 秒更伤，这两类打回一次
@@ -477,9 +478,9 @@ def direct(history, state, text, kind, mode, timeout=60, place=None, place_round
             room = lambda t: (re.search('卧室|客厅|厨房|阳台|浴室|书房|车|酒吧|车库|走廊|大堂|露台|屋顶', t) or [''])[0]
             if _sim(k, str(sp.get('location') or '')) >= 0.6 and room(k) == room(str(sp.get('location') or '')): sp['location'] = k; sp['set'] = v; break  # 要是同一种房间（“公寓卧室”和“公寓客厅”相似度也有 0.67）
     settle_ride(sp, cont, set_now); settle_walk(sp, set_now)
-    ensure_empty_shot(sp); ensure_cast(sp); clean_empty_shots(sp); empty_first(sp, set_now); cast_out_of_seg1(sp)
+    ensure_empty_shot(sp); ensure_cast(sp); clean_empty_shots(sp); empty_first(sp, set_now); cast_out_of_seg1(sp); seg1_wide(sp)
     settle_wardrobe(sp, wardrobe, text, set_now, cont.get('posture') or '', cont.get('outfits') or ()); settle_state(sp, cont, wardrobe, text); clean_zh(sp)
-    ctx = dict(ask_text=text, he_now=(wardrobe or {}).get('he', ''), she_now=(wardrobe or {}).get('she', ''), must_scene=must_scene, must_card=must_card, seen=seen, place_rounds=place_rounds, must_kiss=must_kiss, n=n, prev_opts=(history[-1].get('opts') if history else None), set_now=set_now, lead=lead, stall=stall, her_said=' '.join([h.get('input') or '' for h in history] + [text or '']), items=cont.get('items') or [], left=cont.get('left') or {}, holding=cont.get('holding') or '', looks=list(cont.get('looks') or []), posture=cont.get('posture') or '')
+    ctx = dict(ask_text=text, he_now=(wardrobe or {}).get('he', ''), she_now=(wardrobe or {}).get('she', ''), must_scene=must_scene, must_card=must_card, kind=kind, done=list(done), seen=seen, place_rounds=place_rounds, must_kiss=must_kiss, n=n, prev_opts=(history[-1].get('opts') if history else None), set_now=set_now, lead=lead, stall=stall, her_said=' '.join([h.get('input') or '' for h in history] + [text or '']), items=cont.get('items') or [], left=cont.get('left') or {}, holding=cont.get('holding') or '', looks=list(cont.get('looks') or []), posture=cont.get('posture') or '')
     sp['lint_left'] = lint(sp, m, ctx)  # V1.5：修完还剩的问题只记录，不再为选项单独调一次导演层
     sp['lint_first'] = first_bad
     sp['director_attempts'] = attempt + 1
@@ -551,6 +552,13 @@ def lint(sp, mode, ctx=None):
     if ctx.get('must_scene') and not sp.get('scene_changed') and it != 'direction':
         bad.append(f"【必改】这个地点已经演了 {ctx.get('place_rounds')} 轮，她这一句不是明确引导（{it}），这一轮必须换场（scene_changed=true，用动作切到新地点）")
     mc = ctx.get('must_card')
+    got = [str(k).strip().upper() for k in (sp.get('cards_done') or [])]
+    if mc and ctx.get('kind') not in (None, 'free') and mc not in got:  # V3.2（Vicky 11-04：剧情推进慢，要引导到主线）：她点的是选项、到期的卡就要演，可以和她选的事接在一起；原来只在她含糊时才强制，点选项一直不算
+        bad.append(f'【必改】她点的是选项，关键片段 {mc}（{CARDS.get(mc, {}).get("role", "")[:40]}）已经到期：这一轮把它的核心事件演出来（和她选的事接在一起），写进 cards_done')
+    left_cards = [k for k in CARD_DUE if k not in (ctx.get('done') or []) and k not in got]
+    if left_cards and CARD_DUE[left_cards[0]] <= (ctx.get('n') or 0) + 1:  # V3.2：下一轮到期的卡，至少一个选项要通向它
+        k2 = left_cards[0]; lt = ' '.join(str(((sp.get('next') or {}).get(x) or {}).get('leads_to', '')) for x in ('A', 'B'))
+        if k2 not in lt.upper(): bad.append(f'【必改】下一轮该演关键片段 {k2}（{CARDS.get(k2, {}).get("role", "")[:40]}）：两个选项里至少一个通向它，leads_to 写上 {k2}')
     if mc and (it == 'vague' or (it == 'question' and ctx.get('stall', 0) >= 2)) and mc not in [str(k).strip().upper() for k in (sp.get('cards_done') or [])]:
         bad.append(f'她这一句是 {it}，关键片段 {mc} 已经到期：这一轮必须把 {mc} 的核心事件演出来，并写进 cards_done')
     said = (ctx.get('her_said') or '').lower()
@@ -585,6 +593,8 @@ def lint(sp, mode, ctx=None):
     if not str(sp.get('he_move') or '').strip(): bad.append('没写 he_move：他这一轮主动做了什么推进主线（V2.9）')
     waits = [str(b[0])[:24] for b in allb if WAIT_BEAT.search(str(b[0]))] + ([str(sp.get('hold'))[:24]] if WAIT_BEAT.search(str(sp.get('hold') or '')) else [])
     if waits: bad.append(f"【必改】有“等她决定/等她指路”这类让出主动权的拍子（{'；'.join(waits[:2])}）：换成他主动做的一件事或一件新发生的事（V2.9）")
+    cut1 = [str(b[0])[:20] for b in sp.get('seg1', []) if re.search('切到|已站在.{0,6}(套房|天台|吧台|海滩|泳池)', str(b[0]))]  # V3.2：第 1 段在原地，换场只从第 2 段开始（S00395099c 第 2 轮第 1 段中途切到套房，又漂回泳池）
+    if cut1: bad.append(f"【必改】第 1 段里换了地点（{'；'.join(cut1[:2])}）：第 1 段留在原地，换场放到第 2 段第一拍的空镜")
     fill = [str(b[0])[:20] for b in allb if is_filler(b)]  # V3.0（Vicky 11-04：一个动作拖很久、有定格感）：没有台词只有表情的拍子整轮最多一拍
     if len(fill) > 1 and not slow: bad.append(f"【必改】有 {len(fill)} 拍只有表情没有台词和动作（{'；'.join(fill[:3])}）：整轮最多一拍，其余改成一句台词或一个推动剧情的动作（V3.0）")
     stall = [str(b[1])[:40] for b in allb if len(b) > 1 and STALL_LINE.search(str(b[1]))]
@@ -652,6 +662,14 @@ def _drop_clause(text, w):
     parts = re.split(r'(?<=[，；。,;])', text)
     keep = [p for p in parts if w not in p]
     return ''.join(keep).strip('，；,; ')
+
+
+def seg1_wide(sp):
+    """V3.2：第 1 段没有身份参考图（首帧续接），单人近景、特写最容易换脸（S00395099c 第 2、5 轮她的近景变成另一个人），改成双人中近景。"""
+    n = 0
+    for b in sp.get('seg1') or []:
+        if re.search('单人(中近景|近景)|特写', str(b[2])) and not str(b[2]).startswith('插入'): b[2] = re.sub('单人(中近景|近景)|(大)?特写', '双人中近景', str(b[2]), count=1); n += 1
+    if n: sp['seg1_widened'] = n
 
 
 def cast_out_of_seg1(sp):
@@ -1143,6 +1161,9 @@ def settle_wardrobe(sp, prev, asked='', set_now=None, posture='', outfits=()):
     if NUDE_SHE.search(str(end.get('she') or '')): sp['nude_cut'] = end.get('she'); end['she'] = start.get('she') or L.SHE_DEFAULT
     if NUDE_HE.search(str(end.get('he') or '')): sp['nude_cut'] = end.get('he'); end['he'] = start.get('he') or L.HE_DEFAULT
     if end != start and not want and not WEAR_ACT.search(text) and not TIME_SKIP.search(text): sp['wardrobe_reverted'] = end; end = dict(start)
+    if not want and end.get('she') != start.get('she') and not (start.get('she') and end.get('she') and L.LOOK_OUTER in str(start.get('she')) and L.LOOK_OUTER not in str(end.get('she'))):  # V3.2：她的衣服只在她自己要换时才换（S00395099c 第 5 轮男主一句“Go change”就给她换成深蓝长裙，脸也跟着变了）；脱掉最外面一层除外
+        sp['she_wear_reverted'] = end.get('she'); end['she'] = start.get('she')
+        if not end.get('she'): end.pop('she', None)
     if end.get('she'): end['she'] = end['she'].replace('奶油色和黑色条纹针织上衣', HER_TOP) if HER_TOP else end['she']  # V2.2：写死款式（只写“条纹针织上衣”，关键帧画成带领短袖 POLO，之后一路带下去）
     if not want and redress(sp, start, asked, set_now, posture): end = {}
     settle_change(sp, start, end)
@@ -1196,7 +1217,7 @@ def _shape(sp, mode):
 
 
 def _call(msgs, timeout):
-    body = {'model': MODEL, 'max_tokens': 5200,  # V2.9：多了 news、he_move，选项更长，3800 会截断
+    body = {'model': MODEL, 'max_tokens': 6400,  # V2.9：多了 news、he_move，选项更长，3800 会截断；11-04 三真四假 5200 截断过一次，加到 6400
             'reasoning': {'effort': 'low'}, 'temperature': 0.7, 'messages': msgs}
     body['provider'] = {'order': ['Anthropic'], 'allow_fallbacks': True}  # V1.5b 提速：直连 Anthropic 约快一倍（同一份输入 11.6 秒 vs AWS 22 秒）
     req = U.Request('https://openrouter.ai/api/v1/chat/completions', data=json.dumps(body).encode(),
