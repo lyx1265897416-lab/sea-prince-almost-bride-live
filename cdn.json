@@ -1,10 +1,10 @@
 {
- "media/OPEN.mp4": "https://storage.googleapis.com/waku-core-aicap/uploads/usr_4a6e5fb234d64da0a9429e519b299f07/58eaafeaa07e464e86653e3b1a772714/OPEN.mp4",
+ "media/OPEN.mp4": "https://storage.googleapis.com/waku-core-aicap/uploads/usr_4a6e5fb234d64da0a9429e519b299f07/local/uau_baedc2c6da0b41b685faca3747322d34-rian-OPEN_v2.mp4",
  "media/IDLE0.mp4": "https://storage.googleapis.com/waku-core-aicap/uploads/usr_4a6e5fb234d64da0a9429e519b299f07/f3c414c5bceb4dd0b0bcbf7be6960f64/IDLE0.mp4",
  "media/poster.jpg": "https://storage.googleapis.com/waku-core-aicap/uploads/usr_4a6e5fb234d64da0a9429e519b299f07/65716f323cce4d4e9c79d5c2e093eba5/poster.jpg",
  "audio/WAIT.mp3": "https://storage.googleapis.com/waku-core-aicap/uploads/usr_4a6e5fb234d64da0a9429e519b299f07/2257e3ba2b9848059d41170f2106adf2/WAIT.mp3",
  "_sig": {
-  "media/OPEN.mp4": "50653387-1793864946",
+  "media/OPEN.mp4": "16302650-1793872247",
   "media/IDLE0.mp4": "1501843-1793782809",
   "media/poster.jpg": "222883-1793782809",
   "audio/WAIT.mp3": "2794413-1793782809"

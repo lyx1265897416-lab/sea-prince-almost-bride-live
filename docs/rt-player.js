@@ -54,7 +54,7 @@
   const nowT = () => cur ? before(cur.i) + ((cur.parts[cur.i].v && cur.parts[cur.i].v.currentTime) || 0) : 0;
   const real = () => rate * base;  // base：实际速度 = 显示的倍速 × base（RT.init 的 base，例如 1.1：显示 1x、实际 1.1 倍）
   function applyRate() {
-    stage.querySelectorAll('video').forEach(v => { v.defaultPlaybackRate = real(); v.playbackRate = real(); });
+    stage.querySelectorAll('video').forEach(v => { v.defaultPlaybackRate = real(); if (!v.dataset.warm) v.playbackRate = real(); });  // 后台慢放预载的不动（播放页 warm）
     (voices() || []).forEach(a => { if (a) { a.defaultPlaybackRate = real(); a.playbackRate = real(); } });
     speedBtn.textContent = rate === 1 ? '1x' : rate + 'x';
     menu.querySelectorAll('button').forEach(b => b.classList.toggle('on', Number(b.dataset.r) === rate));
@@ -161,8 +161,8 @@
       });
       if (!once) document.addEventListener('keydown', e => { if (stage && e.code === 'Space' && playing() && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); toggle(); } });
       once = true;
-      stage.addEventListener('play', () => { if (stage) applyRate(); }, true);
-      stage.addEventListener('loadedmetadata', e => { e.target.dataset.rtSrc = e.target.currentSrc; e.target.playbackRate = real(); paint(); }, true);
+      stage.addEventListener('play', e => { if (stage && !(e.target && e.target.dataset && e.target.dataset.warm)) applyRate(); }, true);
+      stage.addEventListener('loadedmetadata', e => { e.target.dataset.rtSrc = e.target.currentSrc; if (!e.target.dataset.warm) e.target.playbackRate = real(); paint(); }, true);
       applyRate();
       const me = (RT._loop = (RT._loop || 0) + 1);
       let lastPaint = 0;
