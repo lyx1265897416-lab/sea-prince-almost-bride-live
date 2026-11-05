@@ -1,7 +1,7 @@
 /* realtime 互动剧通用播放控件（2026-11-01）：进度条、时长、倍速，单击画面暂停和播放。
    第一次看某段内容时进度条只显示不能拖；这段看完过一次，再看时可以随意拖（记在本机 localStorage）。
    用法：页面放一个 #stage，里面正在播的 <video> 带 class="on"，<body> 播放时带 class="playing"。
-     RT.init({drama: '剧集id', zh: () => 是否中文, stage: '#stage', isPlaying: () => 正在播, base: 1});  base：实际播放速度 = 显示的倍速 × base（例如 1.1：显示 1x、实际 1.1 倍）；RT.speed() 返回实际速度。
+     RT.init({drama: '剧集id', zh: () => 是否中文, stage: '#stage', isPlaying: () => 正在播});
      RT.begin({key: '这段内容的唯一名字', parts: [{v: video元素, d: 秒数}, ...], label: '第 1 幕', jump: (i, t) => {...}, free: false});
      RT.part(i)  多段连播时切到第 i 段；RT.done(key) 这段看完了；RT.setVoices(fn) 另外同步暂停和变速的配音 <audio>，fn 返回元素列表。
    没调 begin 也能用：会把正在播的那个 video 当成一段。 */
@@ -52,7 +52,7 @@
   const total = () => cur ? cur.parts.reduce((a, p) => a + durOf(p), 0) : 0;
   const before = i => cur.parts.slice(0, i).reduce((a, p) => a + durOf(p), 0);
   const nowT = () => cur ? before(cur.i) + ((cur.parts[cur.i].v && cur.parts[cur.i].v.currentTime) || 0) : 0;
-  const real = () => rate * base;
+  const real = () => rate * base;  // base：实际速度 = 显示的倍速 × base（RT.init 的 base，例如 1.1：显示 1x、实际 1.1 倍）
   function applyRate() {
     stage.querySelectorAll('video').forEach(v => { v.defaultPlaybackRate = real(); v.playbackRate = real(); });
     (voices() || []).forEach(a => { if (a) { a.defaultPlaybackRate = real(); a.playbackRate = real(); } });
@@ -77,20 +77,22 @@
     paint();
   }
   function trackAt(e) { const r = track.getBoundingClientRect(); return total() * Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); }
+  let was = {};  // 只在内容变了才写页面：这个函数高频调用，每次都写会和视频抢主线程
+  const put = (k, val, fn) => { if (was[k] !== val) { was[k] = val; fn(val); } };
   function paint() {
     const v = active();
     if (!cur && v && !v.loop) RT.begin({ key: 'clip:' + (v.currentSrc || v.src).split('?')[0], parts: [{ v, d: v.duration }] });
     const on = playing() && !!cur;
-    bar.hidden = !on;
-    if (!on) { pausedEl.hidden = true; menu.hidden = true; return; }
+    put('bar', !on, x => { bar.hidden = x; });
+    if (!on) { put('pausedEl', true, x => { pausedEl.hidden = x; }); if (!menu.hidden) menu.hidden = true; return; }
     const paused = !!(v && v.paused && !v.ended && v.readyState >= 2);
-    ppBtn.innerHTML = paused ? PLAY : PAUSE; ppBtn.setAttribute('aria-label', paused ? 'Play' : 'Pause');
-    pausedEl.hidden = !paused || dragging;
-    const D = total(), t = Math.min(nowT(), D), f = D ? t / D * 100 : 0;
-    fill.style.width = f + '%'; knob.style.left = f + '%';
-    timeEl.textContent = fmt(t) + ' / ' + fmt(D);
-    labelEl.textContent = cur.label || ''; labelEl.hidden = !cur.label;
-    track.classList.toggle('free', !!cur.free);
+    put('pp', paused, x => { ppBtn.innerHTML = x ? PLAY : PAUSE; ppBtn.setAttribute('aria-label', x ? 'Play' : 'Pause'); });
+    put('pausedEl', !paused || dragging, x => { pausedEl.hidden = x; });
+    const D = total(), t = Math.min(nowT(), D), f = (D ? t / D * 100 : 0).toFixed(1);
+    put('f', f, x => { fill.style.width = x + '%'; knob.style.left = x + '%'; });
+    put('time', fmt(t) + ' / ' + fmt(D), x => { timeEl.textContent = x; });
+    put('label', cur.label || '', x => { labelEl.textContent = x; labelEl.hidden = !x; });
+    put('free', !!cur.free, x => track.classList.toggle('free', x));
   }
   // V2.3：配乐和歌声。预先生成好的音频按视频时间叠上去，不影响生成速度。mix = {bgm: url, song: {url, seg, at, dur}}
   const bgmEl = new Audio(), songEl = new Audio(); bgmEl.loop = true; bgmEl.volume = 0; let mix = null, bgmVol = 0, duckV = null, unlocked = false;
@@ -132,7 +134,7 @@
       menu = document.createElement('div'); menu.id = 'rtMenu'; menu.hidden = true;
       menu.innerHTML = RATES.slice().reverse().map(r => `<button data-r="${r}">${r}x</button>`).join('');
       pausedEl = document.createElement('div'); pausedEl.id = 'rtPaused'; pausedEl.hidden = true; pausedEl.innerHTML = '<div>' + PLAY + '</div>';
-      hintEl = document.createElement('div'); hintEl.id = 'rtHint'; hintEl.hidden = true;
+      hintEl = document.createElement('div'); hintEl.id = 'rtHint'; hintEl.hidden = true; was = {};
       [pausedEl, bar, menu, hintEl].forEach(x => stage.appendChild(x));
       ppBtn = bar.querySelector('#rtPP'); timeEl = bar.querySelector('#rtTime'); track = bar.querySelector('#rtTrack'); fill = track.querySelector('b'); knob = track.querySelector('u'); labelEl = bar.querySelector('#rtLabel'); speedBtn = bar.querySelector('#rtSpeed');
       const saved = Number(store.get('rt-rate')); if (RATES.includes(saved)) rate = saved;
@@ -163,7 +165,8 @@
       stage.addEventListener('loadedmetadata', e => { e.target.dataset.rtSrc = e.target.currentSrc; e.target.playbackRate = real(); paint(); }, true);
       applyRate();
       const me = (RT._loop = (RT._loop || 0) + 1);
-      (function loop() { if (me !== RT._loop) return; try { paint(); } catch (e) {} requestAnimationFrame(loop); })();
+      let lastPaint = 0;
+      (function loop(now) { if (me !== RT._loop) return; if (dragging || !(now - lastPaint < 120)) { lastPaint = now; try { paint(); } catch (e) {} } requestAnimationFrame(loop); })();
       return RT;
     },
     begin(o) {
@@ -176,6 +179,23 @@
     clear() { cur = null; mix = null; },
     destroy() { RT._loop = (RT._loop || 0) + 1; cur = null; [pausedEl, bar, menu, hintEl].forEach(x => x && x.remove()); stage = null; bar = null; menu = null; },
     setVoices(fn) { voices = fn; },
+    // V3.6 第三视角：中转标出男女主左右对调的那几个镜头（段的 flip = [[开始秒, 结束秒], ...]），播到这几秒时画面水平镜像，换成别的视频自动取消。
+    // 换 src 之后调用：RT.flip(video, s.flip)。按视频帧回调切换，切点前后最多差一帧。
+    flip(v, ranges) {
+      v._flip = ranges && ranges.length ? { src: v.src, r: ranges } : null;
+      if (!v._flip) { v._flipped = false; v.style.transform = ''; }
+      if (v._flipOn) return RT;
+      v._flipOn = 1;
+      v.addEventListener('emptied', () => { if (v._flipped) { v._flipped = false; v.style.transform = ''; } });
+      const tick = (now, meta) => {
+        const f = v._flip, t = meta ? meta.mediaTime : v.currentTime;
+        const on = !!(f && v.src === f.src && f.r.some(([a, b]) => t >= a && t < b));
+        if (on !== !!v._flipped) { v._flipped = on; v.style.transform = on ? 'scaleX(-1)' : ''; }
+        if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(tick); else requestAnimationFrame(() => tick());
+      };
+      tick();
+      return RT;
+    },
     seen,
   };
 })();

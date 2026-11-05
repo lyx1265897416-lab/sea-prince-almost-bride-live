@@ -146,7 +146,7 @@ body.lang-en .zh{display:none!important}
   </section>
   <div id="toast" hidden></div>
 </div>
-<script src="rt-player.js?v=4"></script>
+<script src="rt-player.js?v=5"></script>
 <script>
 (() => {
 const $ = id => document.getElementById(id);
@@ -263,7 +263,7 @@ async function liveRound(kind, choice, said){
   const V = [spare()]; V[0].dataset.keep = 1; V.push(spare()); delete V[0].dataset.keep;
   const poll = setInterval(async () => {
     try { r = await api(`/api/round/${rid}?k=${encodeURIComponent(K)}`); } catch (e) {}
-    if (r && r.segs) r.segs.forEach((s, i) => { if (s.url && V[i].dataset.src !== s.url){ V[i].dataset.src = s.url; load(V[i], s.url); } });  // 一到就预载
+    if (r && r.segs) r.segs.forEach((s, i) => { if (s.url && V[i].dataset.src !== s.url){ V[i].dataset.src = s.url; load(V[i], s.url); } const f = s.url + JSON.stringify(s.flip || []); if (s.url && V[i].dataset.flip !== f){ V[i].dataset.flip = f; RT.flip(V[i], s.flip); } });  // 一到就预载；V3.6 左右对调的镜头由中转标出（flip），播到那几秒水平镜像
   }, 500);
   // V1.5 提速：第 1 段不等第 2 段出片——按第 2 段的预计出片时间（中转给的 eta_left）倒推开播，第 1 段播完正好接上第 2 段
   const LOCAL = location.hostname === '127.0.0.1', M = LOCAL ? 1.5 : 3.0;  // 轮询、隧道延迟和第 2 段从 Vivix CDN 缓冲的余量（秒）
