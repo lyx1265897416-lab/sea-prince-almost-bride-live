@@ -7,7 +7,7 @@ from pathlib import Path
 from PIL import Image
 D = Path(__file__).resolve().parent; M = D / 'masters'; F = M / 'urls.json'
 V = Path('/Users/vicky/Interactive storyline/projects/the-sea-princes-almost-bride/制作/新版互动剧集-v32'); R = V / 'results'; REF = V / 'refs'
-OPEN = V / 'rto_openw/opening.mp4'
+OPEN = V / 'rto_openw11/opening.mp4'
 FF = '/Users/vicky/Interactive storyline/.media-runtime/imageio_ffmpeg/binaries/ffmpeg-macos-aarch64-v7.1'
 
 

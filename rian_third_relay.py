@@ -49,8 +49,8 @@ def persist(path):
     if not m: raise RuntimeError((r.stdout + r.stderr)[-200:])
     return m.group(1)
 
-OPEN_STATE = '开场那天清晨，海下王宫的东廊。Rian 站在画面左侧，她站在画面右侧，两人并肩站着、身体侧向对方，相距半臂；她刚从海里出来，橙红色长发和衣服湿透；摄政官 Vessa 拿着深蓝册子站在画面外左侧（这一刻画面里只有他们两人，Vessa 只有声音，要正面出镜只能放在 seg2 并写进 cast）。她跳海去救被潮水卷走的好友米拉，被他救进王宫；维萨说未登记的访客会被扣留、关于这里的记忆会被封存；他刚当着维萨说她是他未来的新娘，低头看着她，等她的反应。她还没回答。隐藏真相她还不知道：“未婚妻”是他临时编的，普通担保和通行证其实存在。'
-OPEN_NEXT = {'cue': {'zh': '他说完了，低头看着她，等她的回答。', 'en': 'He said it. Now he looks down at her, waiting for her answer.'},
+OPEN_STATE = '开场那天清晨，海下王宫的东廊。Rian 站在画面左侧，她站在画面右侧，两人并肩站着、身体侧向对方，相距半臂；她刚从海里出来，橙红色长发和衣服湿透；摄政官 Vessa 拿着深蓝册子站在画面外左侧（这一刻画面里只有他们两人，Vessa 只有声音，要正面出镜只能放在 seg2 并写进 cast）。她跳海去救被潮水卷走的好友米拉，被他救进王宫；维萨说未登记的访客会被扣留、关于这里的记忆会被封存；他刚当着维萨说她是他未来的新娘；维萨（画面外）冷冷地问她“Is that true?”，等她亲口回答，他也低头看着她。她还没回答。隐藏真相她还不知道：“未婚妻”是他临时编的，普通担保和通行证其实存在。'
+OPEN_NEXT = {'cue': {'zh': '维萨问她是不是真的，他低头看着她，两人都在等她的回答。', 'en': 'Vessa asks if it is true. He looks down at her. Both wait for her answer.'},
              'A': {'zh': '先配合他，找朋友要紧。', 'en': 'Play along—for now.', 'leads_to': 'K02：他低声让她先配合、保证带她去找米拉，维萨暂时放行'},
              'B': {'zh': '当场反问：谁是你的新娘？', 'en': 'Call his bluff: whose bride?', 'leads_to': 'K02：他面不改色接住，维萨冷冷合上册子放行'}}
 
@@ -149,9 +149,17 @@ def prepare_frame(s, rid, seg2_url):
         mp4 = FR / f'{rid}_2.mp4'; jpg = FR / f'{rid}_last.jpg'
         if seg2_url.startswith('/'): mp4.write_bytes((SITE / seg2_url.lstrip('/')).read_bytes())  # 校色后的第 2 段在本机
         else: fetch(seg2_url, mp4)
+        s2 = R[rid]['segs'][1]
+        for _ in range(90):  # V3.6：等第 2 段的左右检查（约 15–25 秒，这时观众还在看第 1 段），末帧落在镜像的镜头里就跟着镜像，下一轮仍是男左女右
+            if s2.get('side') is not None: break
+            time.sleep(0.5)
+        dur2 = float(subprocess.run([L.FFMPEG.replace('ffmpeg', 'ffprobe'), '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', str(mp4)], capture_output=True, text=True).stdout or 0)
+        in_flip = lambda back: any(a <= dur2 - back < b for a, b in s2.get('flip') or [])
+        mirror = lambda p: (subprocess.run([L.FFMPEG, '-v', 'error', '-y', '-i', str(p), '-vf', 'hflip', '-q:v', '2', str(p.with_name(p.stem + '_flip.jpg'))], check=True), p.write_bytes(p.with_name(p.stem + '_flip.jpg').read_bytes()))
         try:  # V1.5 提速：先抽一张没查过的末帧传上去，下一轮发送时质检、修图还没好就用它（不等）
             q0 = FR / f'{rid}_last_quick.jpg'
             subprocess.run([L.FFMPEG, '-v', 'error', '-y', '-sseof', '-0.15', '-i', str(mp4), '-frames:v', '1', '-q:v', '2', str(q0)], check=True)
+            if in_flip(0.15): mirror(q0)
             if s.get('frame_pending') == rid: s['frame_quick'] = c.upload(q0)['url']
         except Exception as e: log('QUICKFRAMEFAIL', rid, str(e)[:120])
         qa = {}; url = None
@@ -179,7 +187,10 @@ def prepare_frame(s, rid, seg2_url):
             if pick[3]: log('FRAMEQA', rid, 'no standard frame found, keep', -back, qa.get('face_box'))
         else: back = 0.15
         qa['back'] = back
-        if any(re.search(r'对调|换边|Rian[^，。]{0,6}右侧|她[^，。]{0,6}左侧', i.get('text', '')) for i in kinds(qa, 'staging')):  # 第三视角 v1 第 4 轮：找不到不越轴的帧，就把这一帧左右镜像，让下一轮仍是男左女右
+        if in_flip(back):
+            mirror(jpg); qa['flipped'] = 'side'; log('FRAMEQA', rid, 'last shot was mirrored on the page, mirror the frame too')
+            qa['issues'] = [i for i in qa.get('issues', []) if not (isinstance(i, dict) and i.get('kind') == 'staging')]
+        elif any(re.search(r'对调|换边|Rian[^，。]{0,6}右侧|她[^，。]{0,6}左侧', i.get('text', '')) for i in kinds(qa, 'staging')):  # 第三视角 v1 第 4 轮：找不到不越轴的帧，就把这一帧左右镜像，让下一轮仍是男左女右
             subprocess.run([L.FFMPEG, '-v', 'error', '-y', '-i', str(jpg), '-vf', 'hflip', '-q:v', '2', str(jpg.with_name(jpg.stem + '_flip.jpg'))], check=True)
             jpg.write_bytes(jpg.with_name(jpg.stem + '_flip.jpg').read_bytes()); qa['flipped'] = True; log('FRAMEQA', rid, 'staging swapped, mirrored')
             qa['issues'] = [i for i in qa.get('issues', []) if not (isinstance(i, dict) and i.get('kind') == 'staging')]
@@ -330,9 +341,20 @@ def run_seg(rid, i, dur, prompt, first, frame_url, face_url, extra=(), no_scene=
         w_hc = sp_hc.get('wardrobe_end') or {}; w0_hc = sp_hc.get('wardrobe_start') or {}
         wear = f"男主：{w_hc.get('he') or L.HE_DEFAULT}；女主：{w_hc.get('she') or L.SHE_DEFAULT}" if i == 1 else '；'.join(x for x in ((f"男主：{w0_hc.get('he') or L.HE_DEFAULT}" if w0_hc.get('he') == w_hc.get('he') else ''), (f"女主：{w0_hc.get('she') or L.SHE_DEFAULT}" if w0_hc.get('she') == w_hc.get('she') else '')) if x)  # V3.4：第 1 段也查，只查这一轮没换装的人（Rafael 11-04 第 4 轮第 1 段他的牛仔裤变成黑裤）
         magic = re.search('飞|魔法|悬浮|漂浮|超能力|变身|穿越', str(R[rid].get('input') or ''))
+        def bg_side(u):  # V3.6：两人左右对调的镜头标出来（s['flip']），播放页播到那几秒水平镜像；和开播检查同时开始、不挡开播，只认最后通过检查的那一条
+            mp4 = FR / f'{rid}_{i + 1}_side_{uuid.uuid5(uuid.NAMESPACE_URL, u).hex[:8]}.mp4'
+            try:
+                fetch(u, mp4); sd = qa_guard.side_flips(mp4, looks(L.HE_LOOK, 50), looks(L.HER, 90))
+                if s.get('side_of') == u: s['flip'] = sd['flip']; s['side'] = {k: sd[k] for k in ('both', 'cuts', 'sec')}
+                log('SIDE', rid, i + 1, sd['sec'], sd['both'], ('flip ' + json.dumps(sd['flip'])) if sd['flip'] else 'ok', '' if s.get('side_of') == u else '(regenerated, ignored)')
+            except Exception as e:
+                if s.get('side_of') == u: s['side'] = {'err': str(e)[:160]}
+                log('SIDEFAIL', rid, i + 1, str(e)[:160])
+            finally: mp4.unlink(missing_ok=True); save(rid)
         for tn in range(3):
             hcf = FR / f'{rid}_{i + 1}_hc.mp4'
-            try: fetch(job['video_url'], hcf); hc = qa_guard.hard_check(hcf, people, wear)
+            s['side_of'] = job['video_url']; s.pop('side', None); s.pop('flip', None)
+            try: fetch(job['video_url'], hcf); threading.Thread(target=bg_side, args=(job['video_url'],), daemon=True).start(); hc = qa_guard.hard_check(hcf, people, wear)
             except Exception as e: hc = {'bad': False, 'kinds': [], 'err': str(e)[:120]}
             hcf.unlink(missing_ok=True); s.setdefault('hard_check', []).append(hc); log('HARDCHECK', rid, i + 1, tn, json.dumps(hc, ensure_ascii=False)[:200])
             kinds = set(hc.get('kinds') or []) or ({'people'} if hc.get('bad') else set())
@@ -527,7 +549,8 @@ def _worker(rid):
 def hist_entry(r, sp):
     return {'input': r['input'], 'kind': r['kind'], 'lines': r['lines']['seg1'] + r['lines']['seg2'],
             'did': sp.get('did'), 'ask': sp.get('ask'), 'delivered': bool(sp.get('delivered')), 'hook_type': sp.get('hook_type'),
-            'reveal': sp.get('reveal') or [], 'intimacy': sp.get('intimacy') or 0, 'place': sp.get('location'), 'set': sp.get('set'), 'extras': sp.get('extras') or [], 'input_type': sp.get('input_type'), 'kiss': bool(sp.get('kiss')), 'staging': sp.get('staging'),
+            'reveal': sp.get('reveal') or [], 'intimacy': sp.get('intimacy') or 0, 'place': sp.get('location'), 'set': sp.get('set'), 'extras': sp.get('extras') or [], 'input_type': sp.get('input_type'), 'kiss': bool(sp.get('kiss')), 'surprise': bool(sp.get('surprise')), 'staging': sp.get('staging'),
+            'pending': sp.get('pending_move') if isinstance(sp.get('pending_move'), dict) else {}, 'closed': str(sp.get('closed') or ''),  # V3.9：结尾悬着的招、这一轮关闭的疑问
             'opts': [((sp.get('next') or {}).get(k) or {}).get('zh', '') for k in ('A', 'B')]}
 
 
