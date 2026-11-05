@@ -17,7 +17,7 @@ HER_URL = _L.TU['her']  # 她：正面头像 + 全身正面 + 多角度合图
 CHECK = """图片1是一部观众第三视角互动剧的一帧画面：画面里应该同时有男主 Rian 和女主（她），Rian 在画面左侧、她在画面右侧。图片2是男主的身份母版，图片3是女主的身份母版（判断是不是同一个人以它们为准）。下一段视频会从这一帧接着生成，所以这一帧必须干净。请按下面的锁定项检查，只报你在画面上确实看到的问题：
 1. 画面里除了男主、女主{allowed}还有没有其他人（路人、背影、人影、半透明人头）？同一个人出现两次也算。
 2. 女主在不在画面里、脸能不能看清？女主长相和图片3比是不是明显换了人（脸型、五官、眼睛、年龄、变得幼态）？她应为：西方人长相、白皙瓷肤、蓝灰色眼睛、橙红色披散长发和左侧银月牙发夹、银圈耳环；浅长春花蓝泡泡袖衬衫、细黑皮带、炭灰格纹阔腿裤。发色变成黑色、棕色或金黄色、头发变短或扎起、衬衫换了颜色款式、长裤换成裙子，都算问题（kind=her）。
-3. 男主服装：在陆地上应为半透明珍珠白长披袍（左肩月牙胸针、胸前珍珠链）和象牙白灯笼裤；在水里是浅长春花蓝长尾。披袍变成不透明的白袍、短上衣、系腰带，裤子变成修身西裤或牛仔裤，或同时有腿又有尾巴，算问题。
+3. 男主服装：在陆地上应为半透明珍珠白长披袍（左肩月牙胸针、胸前珍珠链）和象牙白灯笼裤；在水里是浅长春花蓝长尾。披袍变成不透明的白袍、短上衣、系腰带，裤子变成修身西裤或牛仔裤，或同时有腿又有尾巴，或在陆地上披袍不见了、赤裸上身、手臂肩膀胸口长出鳞片，算问题（剧情写了他下到海水里的除外）。
 4. 男主配饰：只有耳朵的珍珠和冰蓝水滴耳坠、蓝水滴吊坠、左手腕细银镯、上臂银臂环。多出纹身、戒指、手表算问题（kind=accessory）。
 5. 男主瞳色：应为淡紫灰色。变成金色、红色、发光算问题。（看不到眼睛就不报）
 6. 男主长相：和图片2比，是不是明显换了人（脸型、五官、年龄、肤色不同）、变老、变成方下巴、长出胡茬、头发变短变黑、耳鳍不见了？
@@ -43,6 +43,24 @@ SCENE_DIFF_MAX = 20  # 修图前后画面四周（背景）的平均灰度差，
 SIDE_RULE = '15. 站位（这一刻两人并排坐着）：两人应并排坐、身体侧过来朝向对方，Rian 在左、她在右。是不是变成面对面坐、或者两人都正对镜头像证件照？是就算问题（kind=staging）。\n'
 
 
+VLM_FALLBACK = 'qwen/qwen3-vl-235b-a22b-instruct'  # V3.10：OpenRouter 对这个账户的 Anthropic/OpenAI/Google 一律 403（2026-11-04 19:20 起）时视觉质检全部失效（人鱼王子 S232959810 五轮 HARDCHECK/SEGQA/FRAMEQA 全是 403，换装、脱袍、长鳞都没拦下）；这时这一次改用它，主模型恢复后自动回到主模型
+
+FALLBACK_KINDS = {'people', 'her', 'outfit', 'state', 'scene', 'staging', 'framing', 'text'}
+
+
+def _post(body, timeout):
+    """V3.10：发一次 OpenRouter 请求；主模型 403 就换 VLM_FALLBACK 再发一次（去掉它不认的 reasoning）。"""
+    import urllib.error
+    def go(b):
+        req = U.Request('https://openrouter.ai/api/v1/chat/completions', data=json.dumps(b).encode(), headers={'Authorization': 'Bearer ' + director._key(), 'Content-Type': 'application/json'})
+        with U.urlopen(req, timeout=timeout) as r: return json.loads(r.read())
+    try: return go(body)
+    except urllib.error.HTTPError as e:
+        if e.code != 403 or body.get('model') == VLM_FALLBACK: raise
+        b = {k: v for k, v in body.items() if k != 'reasoning'}; b['model'] = VLM_FALLBACK
+        return go(b)
+
+
 def check(jpg, timeout=60, cast=(), side=False, worn=(), state=''):
     b64 = base64.b64encode(open(jpg, 'rb').read()).decode()
     body = {'model': VLM, 'max_tokens': 1200, 'reasoning': {'effort': 'low'},
@@ -51,19 +69,20 @@ def check(jpg, timeout=60, cast=(), side=False, worn=(), state=''):
                                                       {'type': 'image_url', 'image_url': {'url': FACE_URL}},
                                                       {'type': 'image_url', 'image_url': {'url': HER_URL}}]}]}
     t0 = time.time()
-    req = U.Request('https://openrouter.ai/api/v1/chat/completions', data=json.dumps(body).encode(),
-                    headers={'Authorization': 'Bearer ' + director._key(), 'Content-Type': 'application/json'})
-    with U.urlopen(req, timeout=timeout) as r: j = json.loads(r.read())
+    j = _post(body, timeout)
     txt = j['choices'][0]['message'].get('content') or ''
     m = re.search(r'\{.*\}', txt, re.S)
     res = json.loads(m.group(0)) if m else {'ok': True, 'issues': [], 'raw': txt[:200]}
     res['sec'] = round(time.time() - t0, 1)
+    if VLM_FALLBACK in str(j.get('model')):  # V3.10：兜底模型瞳色、道具、耳环、肤质误报多（R05 末帧 8 条里 4 条是误报），只留会一路传下去的大问题
+        res['model'] = j.get('model'); res['dropped'] = [i for i in res.get('issues', []) if isinstance(i, dict) and i.get('kind') not in FALLBACK_KINDS]
+        res['issues'] = [i for i in res.get('issues', []) if not isinstance(i, dict) or i.get('kind') in FALLBACK_KINDS]
     return res
 
 
-def _edit(prompt, images, timeout):
+def _edit(prompt, images, timeout, model='google/nano-banana-pro/edit'):
     params = {'prompt': prompt, 'images': images, 'aspect_ratio': '9:16', 'resolution': '1k', 'output_format': 'jpeg'}
-    r = subprocess.run(['waku', 'gen', 'run', 'google/nano-banana-pro/edit', '--capability', 'multimodal.generate.image', '--params', json.dumps(params)],
+    r = subprocess.run(['waku', 'gen', 'run', model, '--capability', 'multimodal.generate.image', '--params', json.dumps(params)],
                        capture_output=True, text=True, timeout=timeout)
     m = re.search(r'\{.*\}', r.stdout, re.S)
     j = json.loads(m.group(0)) if m else {}
@@ -74,6 +93,7 @@ def _edit(prompt, images, timeout):
     return j['asset_url']
 
 
+KEY_WAKU = 'google/nano-banana-2.1/edit'  # V3.10：OpenRouter 403 时末帧回正走 Waku（人鱼王子 R05 末帧实测 45 秒，披袍和胸针回来了）
 KEY_ALT = 'google/gemini-2.5-flash-image'  # 2026-11-02 实测 20 秒、$0.039
 KEY_MODEL = 'google/gemini-3.1-flash-lite-image'  # 2026-11-01 实测：同一条指令 22.8 秒、约 $0.035；Waku 通道排队时 65–120 秒，等不起
 
@@ -82,7 +102,7 @@ ANCHOR_DIFF_BOTH = 50  # V2.4：两人都在画面里时回正不该改构图；
 ANCHOR_DIFF_MAX = 120  # 回正可以改构图（末帧是吻戏近景时回正会拉远，第 11–14 轮差 86–98 被拒，长相衣服又漂了），差到这个程度才是换了地点
 
 
-def key_frame(prompt, images, out, timeout=45, hedge=3):
+def key_frame(prompt, images, out, timeout=45, hedge=3, waku_ok=0):
     """V2.0：状态关键帧（第 2 段第一张画面），写到本地文件 out。V2.2：同时发两个请求，先回来的用（单次 13–56 秒，抖动大），不再退回 Waku（曾一次等 195 秒）；都失败就抛错，这一轮按没有关键帧走。"""
     from concurrent.futures import ThreadPoolExecutor, as_completed
     def one(i):
@@ -103,6 +123,14 @@ def key_frame(prompt, images, out, timeout=45, hedge=3):
             except Exception as e: err = e
     except Exception as e: err = e
     finally: ex.shutdown(wait=False)
+    if waku_ok and '403' in str(err):  # V3.10：OpenRouter 出图模型只有 Google/OpenAI，403 时改走 Waku（nano-banana 2.1 edit，实测约 45 秒），只给不卡开播的末帧回正用
+        try:
+            import io
+            from PIL import Image
+            u = _edit(prompt, images, waku_ok, KEY_WAKU)
+            with U.urlopen(u, timeout=60) as r: Image.open(io.BytesIO(r.read())).convert('RGB').save(out, 'JPEG', quality=93)
+            return 'waku'
+        except Exception as e: err = e
     raise RuntimeError('关键帧失败：' + str(err)[:160])
 
 
@@ -198,10 +226,12 @@ def hard_check(mp4, people, wear='', timeout=20):
     t0 = time.time(); content = [{'type': 'text', 'text': HARD_CHECK.format(n=len(fr), people=people, wear=(f'- clothes：男主、女主这时应该穿着：{wear}。画面里的其他人（配角）穿的是他们自己的衣服，和女主不一样是正常的，不按男主女主的衣服查他们。一眼就能看出的颜色错误才报，比如灰色 T 恤变成白色、一条裙子变了颜色。深浅差一点、款式细节、光线造成的差异都不报；纹身、项链、皮肤和发型不是衣服，不报。\n' if wear else '衣服颜色和款式也不报。'))}] + [{'type': 'image_url', 'image_url': {'url': 'data:image/jpeg;base64,' + b}} for b in fr]
     def ask(model):
         body = {'model': model, 'max_tokens': 600, 'messages': [{'role': 'user', 'content': content}]}
-        req = U.Request('https://openrouter.ai/api/v1/chat/completions', data=json.dumps(body).encode(), headers={'Authorization': 'Bearer ' + director._key(), 'Content-Type': 'application/json'})
-        with U.urlopen(req, timeout=timeout) as r: j = json.loads(r.read())
+        j = _post(body, timeout)
         txt = j['choices'][0]['message'].get('content') or ''
-        return dict(json.JSONDecoder().raw_decode(txt[txt.find('{'):])[0], sec=round(time.time() - t0, 1), model=model)
+        v = dict(json.JSONDecoder().raw_decode(txt[txt.find('{'):])[0], sec=round(time.time() - t0, 1), model=j.get('model') or model)
+        if VLM_FALLBACK in str(v['model']) and set(v.get('kinds') or []) - {'people', 'motion'}:  # V3.10：兜底模型把她的衬衫款式报成换装（S232959810 R03 第 2 段 2/2 误报）、把男主定装的单肩披袍报成裸露（S235951ace 第 1 轮两段都报），重生成两次后整轮报错；兜底时只按人数和动态拦，衣服、裸露只记录，换装靠导演层兜底和末帧回正
+            v['logged'] = {'kinds': [k for k in v['kinds'] if k not in ('people', 'motion')], 'why': v.get('why')}; v['kinds'] = [k for k in v['kinds'] if k in ('people', 'motion')]; v['bad'] = bool(v['kinds'])
+        return v
     from concurrent.futures import ThreadPoolExecutor, as_completed
     ex = ThreadPoolExecutor(3)  # 主模型同发两个，先回来的用（平时 5–10 秒，偶尔 15 秒以上）；20 秒还没有就用便宜模型的结论（它什么都拦得住，但误报约三成）
     main = [ex.submit(ask, HARD_MODEL) for _ in range(2)]; lite = ex.submit(ask, HARD_LITE)
@@ -216,6 +246,64 @@ def hard_check(mp4, people, wear='', timeout=20):
     return {'bad': False, 'kinds': [], 'why': 'check failed', 'err': True, 'sec': round(time.time() - t0, 1)}
 
 
+SIDE_MODELS = ('qwen/qwen3-vl-235b-a22b-instruct', 'meta-llama/llama-4-maverick')  # 2026-11-04 用 S0456238e8 等片段比过：两个都对就判对调，单个模型会把过肩镜头、拥抱当成对调；gemma-3、nova-pro 漏报或多报
+SIDE_CHECK = ('下面是同一段短视频按时间顺序每秒抽一张的 {n} 张独立画面。男主：{he}。女主：{she}。\n'
+              '逐张看两个人的脸（眼睛、鼻子、嘴能看到才算看得到脸；只露出后脑、肩膀、手臂、半边头发的算看不到）：he=男主的脸在画面的左边还是右边，she=女主的脸在画面的左边还是右边，看不到脸写 -。'
+              '只输出 JSON：{{"frames": [{{"he": "L/R/-", "she": "L/R/-"}}, ...]}}，正好 {n} 项。')
+
+
+def side_flips(mp4, he, she, timeout=60):
+    """V3.6 男女主左右对调（Vicky 11-04，meet S0456238e8 第 3 轮第 1 段：从中景切到双人中近景的两个镜头，两人整个换边，背景没变）。
+    每秒一帧，两个视觉模型各判一遍他和她的脸在左还是右，两个都说“他右她左”才算对调；按本地切点分镜头，除第一个镜头（接首帧）外，
+    一个镜头里有 2 帧以上对调、没有一帧两个模型都说正常，就把这个镜头标出来，播放页播到这几秒时水平镜像。返回 {flip: [[开始秒, 结束秒], ...], frames, cuts, sec}。"""
+    import tempfile
+    import dissolve
+    import live_common as L
+    from concurrent.futures import ThreadPoolExecutor
+    t0 = time.time()
+    with tempfile.TemporaryDirectory() as d:
+        subprocess.run([L.FFMPEG, '-v', 'error', '-y', '-i', str(mp4), '-vf', 'fps=1.0,scale=320:-2', '-q:v', '5', d + '/%02d.jpg'], check=True)
+        fr = [base64.b64encode(p.read_bytes()).decode() for p in sorted(Path(d).glob('*.jpg'))]
+    content = [{'type': 'text', 'text': SIDE_CHECK.format(n=len(fr), he=he, she=she)}] + [{'type': 'image_url', 'image_url': {'url': 'data:image/jpeg;base64,' + b}} for b in fr]
+    def ask(model):
+        body = {'model': model, 'max_tokens': 1200, 'temperature': 0, 'messages': [{'role': 'user', 'content': content}]}
+        req = U.Request('https://openrouter.ai/api/v1/chat/completions', data=json.dumps(body).encode(), headers={'Authorization': 'Bearer ' + director._key(), 'Content-Type': 'application/json'})
+        with U.urlopen(req, timeout=timeout) as r: j = json.loads(r.read())
+        txt = j['choices'][0]['message'].get('content') or ''
+        fs = json.JSONDecoder().raw_decode(txt[txt.find('{'):])[0]['frames']
+        return ''.join('R' if (x.get('he'), x.get('she')) == ('R', 'L') else 'L' if (x.get('he'), x.get('she')) == ('L', 'R') else '-' for x in fs if isinstance(x, dict))
+    def ask2(model):  # 偶尔 400 / 超时：重试一次，还不行这个模型就算全部看不清（只会少标、不会多标）
+        for k in range(2):
+            try: return ask(model)
+            except Exception as e: err = str(e)[:80]
+        errs.append(model + ' ' + err); return '-' * len(fr)
+    errs = []
+    with ThreadPoolExecutor(len(SIDE_MODELS)) as ex: res = list(ex.map(ask2, SIDE_MODELS))
+    both = ''.join('R' if all(r[k:k + 1] == 'R' for r in res) else 'L' if all(r[k:k + 1] == 'L' for r in res) else '.' for k in range(len(fr)))
+    import numpy as np
+    g = dissolve.frames(str(mp4)).mean(axis=3); dd = np.abs(g[1:] - g[:-1]).mean(axis=(1, 2))
+    cuts, cl = [], []
+    for k in [int(x) + 1 for x in np.where(dd > 18)[0]] + [10 ** 9]:  # 第 k 帧是新镜头第一帧（24 fps）
+        if cl and k - cl[-1] > 12:  # 0.5 秒内连着几个“切点”多半是快速运动：只留帧差明显最高、像真切镜的那一个（meet S2006574bd 第 1 段 6.04 秒切点前面有快速动作，整簇丢掉后把前一个近景也标成对调）
+            best = max(cl, key=lambda x: dd[x - 1]); rest = [dd[x - 1] for x in cl if x != best]
+            if not rest or (dd[best - 1] >= 40 and dd[best - 1] >= 2 * max(rest)): cuts.append(best / 24)
+            cl = []
+        cl.append(k)
+    shots = []
+    for a, b in zip([0.0] + cuts, cuts + [999.0]):
+        ks = [k for k in range(len(fr)) if a <= k < b]  # 第 k 张约在第 k 秒
+        nR = sum(both[k] == 'R' for k in ks); nL = sum(both[k] == 'L' for k in ks)
+        shots.append([a, b, a > 0 and nL == 0 and (nR >= 2 or nR == len(ks) == 1), nR + nL == 0])  # 第一个镜头接首帧（参考图），不动
+    for k in range(1, len(shots) - 1):  # 前后两个镜头都对调、中间是看不到脸的背影或空镜，一起镜像（Rafael S193728568 第 3 轮：对调—背影—对调）
+        if shots[k][3] and shots[k - 1][2] and shots[k + 1][2]: shots[k][2] = True
+    flip = []
+    for a, b, f, _ in shots:
+        if not f: continue
+        if flip and abs(flip[-1][1] - a) < 1e-6: flip[-1][1] = round(b, 3)
+        else: flip.append([round(a, 3), round(b, 3)])
+    return {'flip': flip, 'errs': errs, 'frames': res, 'both': both, 'cuts': [round(x, 2) for x in cuts], 'sec': round(time.time() - t0, 1)}
+
+
 def seg_state(mp4, state, timeout=40):
     """V2.0：穿着或姿态不是默认的那一段，播放前看一遍全程有没有变回去（Rafael 第 6 轮第 2 段后半段 T 恤又穿回去了）。"""
     g = Path(str(mp4)).with_suffix('.st.jpg'); n = grid(mp4, g)
@@ -223,8 +311,7 @@ def seg_state(mp4, state, timeout=40):
     t = (f'这张图是一段视频按时间顺序等间隔抽的 {n} 帧。这一段全程的状态应该是：{state}。逐格看有没有和它明确矛盾：已经脱掉的衣服穿在身上、该穿着的衣服不见了、该躺着却站着、该在车上却不在。'
          '只看大状态：看不到、无法确认的都不算；手放在哪、搂得紧不紧、半躺还是全躺、手表和裤子看不看得到都不算；空镜、只拍到脸看不出来的格子不算。只输出 JSON：{"bad": true 或 false, "why": "哪一格、什么问题，没有写空"}')
     body = {'model': VLM, 'max_tokens': 400, 'reasoning': {'effort': 'low'}, 'messages': [{'role': 'user', 'content': [{'type': 'text', 'text': t}, {'type': 'image_url', 'image_url': {'url': 'data:image/jpeg;base64,' + b64}}]}]}
-    req = U.Request('https://openrouter.ai/api/v1/chat/completions', data=json.dumps(body).encode(), headers={'Authorization': 'Bearer ' + director._key(), 'Content-Type': 'application/json'})
-    with U.urlopen(req, timeout=timeout) as r: j = json.loads(r.read())
+    j = _post(body, timeout)
     txt = j['choices'][0]['message'].get('content') or ''; g.unlink(missing_ok=True)
     i = txt.find('{')
     return json.JSONDecoder().raw_decode(txt[i:])[0] if i >= 0 else {'bad': False, 'why': 'no json'}
@@ -247,9 +334,7 @@ def seg_check(mp4, cast=(), timeout=60, props=()):
                                                       {'type': 'image_url', 'image_url': {'url': FACE_URL}},
                                                       {'type': 'image_url', 'image_url': {'url': HER_URL}}]}]}
     t0 = time.time()
-    req = U.Request('https://openrouter.ai/api/v1/chat/completions', data=json.dumps(body).encode(),
-                    headers={'Authorization': 'Bearer ' + director._key(), 'Content-Type': 'application/json'})
-    with U.urlopen(req, timeout=timeout) as r: j = json.loads(r.read())
+    j = _post(body, timeout)
     txt = j['choices'][0]['message'].get('content') or ''
     m = re.search(r'\{.*\}', txt, re.S)
     v = json.loads(m.group(0)) if m else {}

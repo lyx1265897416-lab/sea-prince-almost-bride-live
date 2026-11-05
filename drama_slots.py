@@ -19,12 +19,20 @@ SLOTS = {'q.HER_HAIR_BAD': '发色变成黑色、棕色或金黄色、头发变�
                  'layered silver-lilac, never short, never black. Large translucent blue-violet webbed fin ears with white pearls and long ice-blue teardrop earrings; a blue teardrop pendant on a '
                  'fine silver chain; a thin silver bangle on his left wrist and a silver upper-arm band. He wears a sheer ivory iridescent lace robe gathered on his left shoulder under a large '
                  'silver crescent-moon brooch, strands of pearls and ice-blue beads down his chest, the other shoulder bare, the robe falling in sheer layered panels to his ankles over loose ivory '
-                 'harem trousers, silver strappy sandals. No belt, no tattoos, no rings, no watch. Young slim swimmer build, not bulky. In water he has a long pale periwinkle-blue scaled tail '
-                 'instead of legs.',
+                 'harem trousers, silver strappy sandals. No belt, no tattoos, no rings, no watch. Young slim swimmer build: narrow shoulders, slender arms, flat chest and stomach, no visible '
+                 'six-pack, not muscular. The robe crosses his chest diagonally from the left shoulder and covers his stomach and most of his chest; only the right shoulder, right arm and a little '
+                 'of the right collarbone show. No other jewellery: no gold, no bracers, no gloves, no sash, no gem necklace. His skin is smooth and pale everywhere: no scales on his arms, '
+                 'shoulders, chest or torso, not tanned, not muscular-bulky; only his fin ears may glow faintly blue. On land, indoors and by the pool he stands on two legs with the robe on, pinned '
+                 'at his left shoulder by the brooch. Only when he is swimming in sea water does he have a long pale periwinkle-blue scaled tail instead of legs. His hair is always long, past his '
+                 'shoulders, even when soaking wet or in the wind: never short, never spiky, never cropped; his face always stays 23 and youthful, never older, never rugged. His arms and forearms '
+                 'are plain smooth skin: no fins, no translucent arm frills, no scale patterns; the only fins are his two ear fins. In the sea he is fully merman exactly like his merman reference: '
+                 'bare chest with only a small sheer sash pinned at his left shoulder by the crescent brooch, no long robe, no trousers, no legs; the tail is pale periwinkle blue with white-blue fin '
+                 'frills, never green or teal.',
  'l.HER_LOCK_EN': 'She is a young Western woman: porcelain skin with a soft rosy blush, large clear blue-grey eyes with long lashes, soft straight brows, a small straight nose, full soft lips, a '
                   'delicate oval face. Her hair is long, loose, flowing orange-red (copper-orange) to mid-back, soft waves, with a small silver crescent-moon hair clip on the left side; small silver '
                   'hoop earrings. She wears a pale periwinkle-blue button-up blouse with full puffed long sleeves and buttoned cuffs, a thin black belt, charcoal-grey plaid high-waisted wide-leg '
-                  'trousers, cream heeled ankle boots. Short nude nails, no rings, no necklace.',
+                  'trousers, cream heeled ankle boots. Short nude nails, no rings, no necklace. She is fully human at all times: two legs, never a mermaid tail, never fins or scales, even '
+                  'underwater; underwater she swims kicking her legs, still in her blouse and trousers.',
  'd.HER_TOP': "'浅长春花蓝泡泡袖系扣衬衫，细黑皮带，炭灰格纹高腰阔腿裤'",
  'd.PACKPath__': "'rian_pack.json'",
  'd.WRITER_PEr': 'r"""你是女性向互动短剧《人鱼王子的假新娘》实时版的编剧',
@@ -49,10 +57,10 @@ SLOTS = {'q.HER_HAIR_BAD': '发色变成黑色、棕色或金黄色、头发变�
  'd.他自己的秘密狼人Ma-2': '',
  'd.她也只知道画面里发生': '她只知道画面里发生过的事和她自己的生活（盐点港、潜水、米拉）',
  'd.她也只知道画面里发生-2': '例如他还没承认，选项就不能写“原来你在利用我推掉婚事',
- 'd.纯血狼人族Alpha': '- ⟦HE⟧：23 岁，潮城人鱼王子、王族继承人。年轻、漂亮、自信、会调情，反应快，擅长用一句玩笑抢回主动权；私下会靠近一点、停住、观察她的回应，被她反过来逗时短暂移开目光、耳鳍和锁骨细鳞发亮，再接话。轻佻只是表达方式，不把承诺当笑话；她认真时他收起笑、把话说清楚。弱点：怕她喜欢的只是奇遇和头衔，会拖延解释。他不是霸总：不命令她、不替她决定。\n'
+ 'd.纯血狼人族Alpha': '- ⟦HE⟧：23 岁，潮城人鱼王子、王族继承人。年轻、漂亮、自信、会调情，反应快，擅长用一句玩笑抢回主动权；私下会靠近一点、停住、观察她的回应，被她反过来逗时短暂移开目光、耳鳍泛起淡蓝微光，再接话。轻佻只是表达方式，不把承诺当笑话；她认真时他收起笑、把话说清楚。弱点：怕她喜欢的只是奇遇和头衔，会拖延解释。他不是霸总：不命令她、不替她决定。\n'
                  '- 她：斯凯，22 岁，盐点港的潜水向导学员，橙红色披散长发（外形全程固定，由提示词层写入）。第三视角下她在画面里，她这一轮做的动作（观众点的选项或打的话）要真的由她演出来；她打的话不必由她再说一遍（见导演分镜的三段结构）。她最急的是找回好友米拉；她的感情没有预设，配合、反问、生气、要回家都是有效剧情，也都要往前推。\n'
                  '- 隐藏真相：“未婚妻”是他临时编的担保，普通担保和离城通行证都真实存在；他也想借这个身份推掉和舰队继承人赛拉的政治联姻。假婚约可以谈成三晚、不立誓。誓礼要真实姓名、清醒、双方自愿才成立。\n'
-                 '- 人鱼规则：他进水就恢复银蓝长尾，上岸可以化腿；情绪起伏时耳鳍和锁骨细鳞发出微光（心动的线索，不是测谎）。她下水要戴呼吸坠，先确认有效，不会临时坏掉。\n'
+                 '- 人鱼规则：他进水就恢复银蓝长尾，上岸可以化腿；情绪起伏时只有耳鳍泛起淡蓝微光（心动的线索，不是测谎；皮肤上不长鳞、不发光，V3.10）。在王宫、套房、池边、岸上他一直是人形双腿、穿着整套宫廷装；只有整个人下到海水里游的镜头才是长尾，变回来要演出过程（下水、上岸），不会站在地上突然长出鳞片或尾巴。她下水要戴呼吸坠，先确认有效，不会临时坏掉。\n'
                  '- 他的底线（硬规则）：她说停、后退、不愿意，他立刻松手让开，不挡、不罚；他不把通行证、呼吸坠、王族身份当筹码；她问退路，他说真的退路。他可以出糗、判断失误，然后道歉和承担。\n'
                  '- 已答的不重问：已经说过的事、已经约定的事，不换词再来一遍。\n'
                  '- 可以正面出镜、有身份母版的配角：Vessa（维萨，38 岁，摄政官、他的姑母，讲规矩、对外来者警惕）；Mila（米拉，21 岁，她最好的朋友，被安置在会客厅，平安）。剧情需要时让她们真的出镜、亲口说话（怎么拍见导演分镜）。\n'
@@ -88,7 +96,8 @@ SLOTS = {'q.HER_HAIR_BAD': '发色变成黑色、棕色或金黄色、头发变�
  'd.每个切点都要有动机动': '门外脚步声→切到门',
  'd.时间今晚的故事都发生': '- 时间：故事从开场那天的清晨开始（盐点港清晨 6:12 落水，被带进海下王宫），时间随剧情自然往后走（上午、傍晚、夜里、第二天清晨）；set 里写明这一刻的时间和光线，同一地点前后一致。三晚的约定按真实的夜晚数。',
  'd.他不下封锁关押不许她': "他不下命令、不替她决定、不说不许她走（例如“You're not going anywhere.”），这类压过她选择的台词实时版一律不用",
- 'd.车内两人并排坐在豪车': '- 下水要拍过程：先在岸边或池边确认呼吸坠，seg2 至少 3 拍真正在水下游动：他是人鱼长尾、她戴着呼吸坠，头发在水里飘，气泡和光纹，可用：侧面跟拍的全景看两人游、双人中近景看她握着他的手、略仰的近景看他回头确认她；可以插一拍礁海空镜。staging 写 face。到达洞口不能代替游的过程。',
+ 'd.车内两人并排坐在豪车': '- 下水要拍过程：在岸边或池边确认呼吸坠、走进水里都放在 seg1；seg2 从第一拍起就已经在水下（他已经是人鱼长尾），至少 3 拍真正在水下游动：他是人鱼长尾、她戴着呼吸坠，头发在水里飘，气泡和光纹，可用：侧面跟拍的全景看两人游、双人中近景看她握着他的手、略仰的近景看他回头确认她；可以插一拍礁海空镜。staging 写 '
+                 'face。到达洞口不能代替游的过程。',
  'd.画外声音那一拍门外的': '维萨',
  'd.不写会把画面带去别处': '（2026-10-28 MD 组长镜头中途换房间',
  'd.有人群的地点长老会门': '夜市、王宫大殿、议会',
@@ -183,12 +192,52 @@ SLOTS = {'q.HER_HAIR_BAD': '发色变成黑色、棕色或金黄色、头发变�
                  "    'Mila': ('Mila：二十一岁女人，斯凯最好的朋友，西方人长相，暖白皮肤和很多小雀斑，明亮的蓝眼睛，圆润友善的脸，蜜金色卷发扎成凌乱的高马尾（一侧琥珀色发夹），芥末黄连帽外套里面石板蓝 T 恤，灰色工装裤，白色运动鞋，脖子上挂着黑色相机背带。长相和衣着以她的身份母版为准。', TU['mila']),\n"
                  '}\n'
                  'HE_LOOK = '
-                 "'⟦HE⟧：二十三岁的人鱼王子，一米八五左右，年轻修长的游泳者身材（不壮硕），皮肤非常白皙干净；狭长清秀的脸，高颧骨、尖而精致的下颌（不是方下巴），直而细的鼻梁，深邃的淡紫灰色眼睛，平直的深银色眉毛，小而精致的嘴唇；凌乱有层次的银紫色长发（几缕垂在额前）；一对很大的半透明蓝紫色蹼状耳鳍；每只耳朵两颗白珍珠和一条长长的冰蓝水滴耳坠；一条细银链挂着蓝色水滴吊坠；左手腕一只细银镯，上臂一只银臂环，不戴戒指、不戴手表。宫廷装：一件半透明珍珠白虹彩蕾丝长披袍，在他的左肩用一枚大银月牙胸针束起，胸前垂下一串串珍珠和冰蓝水滴珠链，另一侧肩膀和那边胸口露在外面；长袍分成许多层不规则的半透明长片一直垂到脚踝，里面只隐约透出宽松的象牙白灯笼裤（脚踝收口），银色绑带凉鞋；不系腰带。进到水里他就是人鱼：赤裸修长的上身、珍珠和银臂环，一条很长的浅长春花蓝鳞尾和半透明白蓝鳍边（上身和尾巴约 "
-                 "3:7），同一时刻不会既有腿又有尾巴。他的长相和服装全程不变，以参考的身份母版为准。'\n"
+                 "'⟦HE⟧：二十三岁的人鱼王子，一米八五左右，年轻修长纤瘦的游泳者身材：窄肩细腰、手臂修长，胸腹平坦，没有块状腹肌和隆起的胸肌，不是健美身材，皮肤非常白皙干净；狭长清秀的脸，高颧骨、尖而精致的下颌（不是方下巴），直而细的鼻梁，深邃的淡紫灰色眼睛，平直的深银色眉毛，小而精致的嘴唇；凌乱有层次的银紫色长发（几缕垂在额前）；一对很大的半透明蓝紫色蹼状耳鳍；每只耳朵两颗白珍珠和一条长长的冰蓝水滴耳坠；一条细银链挂着蓝色水滴吊坠；左手腕一只细银镯，上臂一只银臂环，不戴戒指、不戴手表；除了这些身上没有任何别的饰物：没有金饰、护腕、手套、腰带、宝石项链。宫廷装：一件半透明珍珠白虹彩蕾丝长披袍，在他的左肩用一枚大银月牙胸针束起，披袍从左肩斜搭过胸前，盖住腹部和大半个胸口，只露出右肩、右臂和右侧锁骨下一小片；胸前垂下一串串珍珠和冰蓝水滴珠链；长袍分成许多层不规则的半透明长片一直垂到脚踝，里面只隐约透出宽松的象牙白灯笼裤（脚踝收口），银色绑带凉鞋；不系腰带。在王宫、套房、池边和岸上，他一直是人形：两条腿，整套宫廷装穿在身上，披袍始终在左肩用银月牙胸针别着、珍珠串垂在胸前，从侧面和背面看也能看到披袍；皮肤白皙光洁，手臂、肩膀、胸口和身上都没有鳞片，肤色不变深，身材不变壮；情绪起伏时只有耳鳍泛起淡蓝微光。只有剧情写到他整个人在海水里游的镜头才是人鱼：赤裸修长的上身，只有左肩一小片半透明纱用银月牙胸针别着、垂下珍珠串（不是长披袍），银臂环，一条很长的浅长春花蓝鳞尾和半透明白蓝鳍边（上身和尾巴约 "
+                 "3:7），同一时刻不会既有腿又有尾巴；尾巴化成腿是一瞬间的事：水光一闪之后就是光洁白皙的双腿，腿上没有鳞片和鳞纹，不会出现带鳞的腿或连体紧身裤。头发全程是过肩的银紫长发，湿了也不会变短、不会变成短碎发；脸全程是二十三岁的清秀少年感，不变老、不变粗犷；手臂和前臂是光洁皮肤，没有臂鳍、没有半透明鳍片，全身只有两只耳鳍。他的长相和服装全程不变，以参考的身份母版为准。'\n"
+                 "HE_BACK_RE = '披袍'  # V3.10：换回宫廷装时 wardrobe 一字不改写回定装（第 7 轮写成“宫廷上装与灯笼裤，肩披长披袍”，披袍画成不透明长外套）\n"
+                 "BEAT_FIX = {'锁骨上的细鳞': '耳鳍', '锁骨细鳞': '耳鳍', '耳鳍和耳鳍': '耳鳍', '细鳞亮起': '耳鳍亮起', '细鳞发': '耳鳍发', '维萨': 'Vessa', '米拉': 'Mila', '披上肩': '从左肩斜搭过胸前、在左肩别好银月牙胸针（右肩露在外面，不是两肩都披的外套）', '披在肩上': "
+                 "'从左肩斜搭过胸前、在左肩别好银月牙胸针'}  # V3.10：“锁骨细鳞亮起”被画成整条手臂、肩膀长满鳞片（S232959810 第 5 轮），鳞光只落在耳鳍；配角中文名统一成英文名，镜头栏里也认得出\n"
                  "HER_FP = '她的手外形全程固定：纤细白皙的女性双手，指甲短而圆、裸色素甲，手指和手腕上空无一物，袖口是浅长春花蓝泡泡袖的系扣袖口。'\n"
                  'HER = '
-                 "'她：二十二岁的成年女人，西方人的长相，白皙瓷肤，眼下和两颊淡淡的自然红晕，大而清澈的蓝灰色眼睛和长睫毛，柔和平直的眉毛，小巧的直鼻，饱满柔软的嘴唇，精致的鹅蛋脸，不显幼态；橙红色（铜橙色）的披散长发垂到背中间，柔软的波浪，几缕碎发贴着脸，左侧别着一枚小银月牙发夹，耳垂上一对小银圈耳环；浅长春花蓝的系扣衬衫（泡泡长袖、袖口有扣），细黑皮带，炭灰格纹高腰阔腿裤，奶油色粗跟短靴；指甲短而圆、裸色素甲，手指和手腕上空无一物。开场时她刚从海里出来，头发和衣服湿透贴身，之后会慢慢变干。她的长相、发型和服装全程不变，严格以她的身份母版（正面头像、全身正面、近景特写）为准。她的表情自然克制，情绪在眼神里。'\n"
-                 "WOLF = ''",
+                 "'她：二十二岁的成年女人，西方人的长相，白皙瓷肤，眼下和两颊淡淡的自然红晕，大而清澈的蓝灰色眼睛和长睫毛，柔和平直的眉毛，小巧的直鼻，饱满柔软的嘴唇，精致的鹅蛋脸，不显幼态；橙红色（铜橙色）的披散长发垂到背中间，柔软的波浪，几缕碎发贴着脸，左侧别着一枚小银月牙发夹，耳垂上一对小银圈耳环；浅长春花蓝的系扣衬衫（泡泡长袖、袖口有扣），细黑皮带，炭灰格纹高腰阔腿裤，奶油色粗跟短靴；指甲短而圆、裸色素甲，手指和手腕上空无一物。开场时她刚从海里出来，头发和衣服湿透贴身，之后会慢慢变干。她的长相、发型和服装全程不变，严格以她的身份母版（正面头像、全身正面、近景特写）为准；“新娘”“未婚妻”只是他编的称呼，她从不穿婚纱、礼服或长裙。她始终是人类：任何时候都是两条腿，没有鱼尾、没有鳍、没有鳞片，在水下也穿着衬衫长裤、用双腿踢水游。她的表情自然克制，情绪在眼神里。'\n"
+                 "WOLF = ''\n"
+                 '# V3.12（Vicky 11-05 复盘 S024754f68）：下水后导演层把穿着写成“不变”，第 8–11 轮他在水里还穿着宫廷披袍、长出两条腿又带着尾巴、尾巴变成绿色。\n'
+                 '# 分镜定稿前按地点统一他的形态：这一轮结束在海水里，穿着写成人鱼形态（带上人鱼定装参考、没有披袍和腿）；上岸后写回宫廷定装；水里那几拍删掉“披袍”的说法；她永远没有尾巴。\n'
+                 "SEA_HE = '人鱼形态（按人鱼定装）：赤裸修长白皙的上身，只有左肩一小片半透明纱用银月牙胸针别着、垂下几串珍珠，上臂银臂环，左腕细银镯，银紫长发、蓝紫耳鳍和珍珠耳坠照旧；从腰部往下是一条很长的浅长春花蓝鳞尾和半透明白蓝鳍边（上身和尾巴约 3:7）；没有长披袍、没有灯笼裤、没有凉鞋、没有腿'\n"
+                 "WATER_LOC = re.compile('水下|海里|海中|海水|礁海|海面|海蚀洞|洞口外|海底|水中')\n"
+                 "LAND_LOC = re.compile('夜市|岸上|街|码头|长凳|宫|厅|套房|台阶|走廊|东廊|房间|摊')\n"
+                 "ROBE_IN_WATER = [('披袍的肩', '肩'), ('披袍肩', '肩'), ('披袍的领口', '肩头'), ('披袍领口', '肩头'), ('披袍衣领', '肩头'), ('披袍的衣领', '肩头'), ('披袍下摆', '尾鳍'), ('攥住披袍', '攥住他的肩头'), ('抓住披袍', '抓住他的肩'), ('他的披袍', "
+                 "'他的肩'), ('披袍', '肩头'), ('双腿', '长尾'), ('两条腿', '长尾'), ('灯笼裤', '长尾')]\n"
+                 '\n'
+                 '\n'
+                 'def FORM_FIX(sp):\n'
+                 "    w0 = sp.get('wardrobe_start') or {}; w = sp.get('wardrobe_end') if isinstance(sp.get('wardrobe_end'), dict) else {}\n"
+                 "    loc = str(sp.get('location') or '')\n"
+                 "    end_water = bool(WATER_LOC.search(loc + str(sp.get('set') or '')[:30])) and not LAND_LOC.search(loc.replace('王宫外', ''))\n"
+                 "    start_water = '人鱼形态' in str(w0.get('he') or '')\n"
+                 "    before = w.get('he')\n"
+                 "    if end_water: w['he'] = SEA_HE\n"
+                 "    elif start_water or re.search('人鱼|长尾|鱼尾|尾巴', str(w.get('he') or '')): w['he'] = HE_DEFAULT\n"
+                 "    sp['wardrobe_end'] = w\n"
+                 "    if w.get('he') != w0.get('he'): sp['wardrobe_changed'] = True\n"
+                 '    fixed = []\n'
+                 '    if end_water and not start_water:  # 第 2 段带的是人鱼定装，开头还在台阶上的几拍会被画成水下的人鱼（11-05 实测 L041841a28）：第 2 段从第一拍水下镜头开始\n'
+                 "        seg2 = sp.get('seg2') or []; wet_i = next((i for i, b in enumerate(seg2) if isinstance(b, list) and b and re.search('水下|游|长尾|礁海|海里|下潜|潜入|海底', str(b[0]))), None)\n"
+                 '        if wet_i and len(seg2) - wet_i >= 3:\n'
+                 "            drop = seg2[:wet_i]; pend = any('呼吸坠' in str(b[0]) for b in drop)\n"
+                 "            keep = [b for b in drop if str(b[2] if len(b) > 2 else '').startswith('空镜') and re.search('礁海|水下|海里|海底', str(b[0]))]\n"
+                 "            sp['seg2'] = keep + seg2[wet_i:]\n"
+                 "            j = next((i for i, b in enumerate(sp['seg2']) if not str(b[2] if len(b) > 2 else '').startswith('空镜')), None)\n            if pend and j is not None and '呼吸坠' not in str(sp['seg2'][j][0]): sp['seg2'][j][0] = str(sp['seg2'][j][0]) + '，她颈间挂着海绿色呼吸坠'\n"
+                 "            fixed.append('seg2_land_cut:%d' % (len(drop) - len(keep)))\n"
+                 "    for k in ('seg1', 'seg2'):\n"
+                 "        wet = (k == 'seg2' and end_water) or (k == 'seg1' and start_water)\n"
+                 '        for b in sp.get(k) or []:\n'
+                 '            if not isinstance(b, list) or not b: continue\n'
+                 "            t = re.sub('她的(鱼)?尾巴|她的长尾|她的鱼尾', '她的双腿', str(b[0]))\n"
+                 '            if wet:\n'
+                 '                for a, c in ROBE_IN_WATER: t = t.replace(a, c)\n'
+                 '            if t != b[0]: fixed.append(k); b[0] = t\n'
+                 "    if before != w.get('he') or fixed: sp['form_fix'] = {'end_water': end_water, 'start_water': start_water, 'he': str(w.get('he'))[:20], 'beats': fixed}",
  'l.ACT表演克制情绪在': "ACT = '表演自然：⟦HE⟧ 年轻自信、笑意从容，逗人时眼里带笑，认真时笑意收住、目光聚焦，说话自然，不压嗓、不耳语；被她逗到时会短暂移开目光；她说话干脆、反应快，带一点不买账的冷幽默，着急时声音会发紧；情绪在眼神和嘴角。'",
  'l.STYLE写实三维游': "STYLE = ('画面和角色参考图是同一种渲染和画质：精致的三维恋爱游戏 CG "
                  "角色渲染，皮肤细节柔和自然，眼睛和睫毛清晰，发丝分明，织物和鳞片质感清楚；海下王宫低调电影感的光：按脸定曝光，一盏有来源的暖琥珀色烛光加蓝绿色水波光纹勾边，背景比脸暗一点但不发灰，浅景深；不雾、不灰、不柔焦、脸上不发光、不磨皮、不塑料感、不动漫，标准焦段，五官比例自然，画风全程统一；时间和光线按这个地点写的来，肤色保持参考图的颜色。'",
@@ -236,7 +285,7 @@ SLOTS = {'q.HER_HAIR_BAD': '发色变成黑色、棕色或金黄色、头发变�
  'q.1画面里除了男主女主': '',
  'q.2女主在不在画面里脸': '、变得幼态）？她应为：西方人长相、白皙瓷肤、蓝灰色眼睛、橙红色披散长发和左侧银月牙发夹、银圈耳环；浅长春花蓝泡泡袖衬衫、细黑皮带、炭灰格纹阔腿裤',
  'q.2女主在不在画面里脸-2': '衬衫换了颜色款式、长裤换成裙子',
- 'q.3男主服装应为一身黑': '3. 男主服装：在陆地上应为半透明珍珠白长披袍（左肩月牙胸针、胸前珍珠链）和象牙白灯笼裤；在水里是浅长春花蓝长尾。披袍变成不透明的白袍、短上衣、系腰带，裤子变成修身西裤或牛仔裤，或同时有腿又有尾巴，算问题。',
+ 'q.3男主服装应为一身黑': '3. 男主服装：在陆地上应为半透明珍珠白长披袍（左肩月牙胸针、胸前珍珠链）和象牙白灯笼裤；在水里是浅长春花蓝长尾。披袍变成不透明的白袍、短上衣、系腰带，裤子变成修身西裤或牛仔裤，或同时有腿又有尾巴，或在陆地上披袍不见了、赤裸上身、手臂肩膀胸口长出鳞片，算问题（剧情写了他下到海水里的除外）。',
  'q.4男主配饰只允许左手': '4. 男主配饰：只有耳朵的珍珠和冰蓝水滴耳坠、蓝水滴吊坠、左手腕细银镯、上臂银臂环。多出纹身、戒指、手表算问题（kind=accessory）。',
  'q.5男主瞳色应为明亮的': '应为淡紫灰色。变成金色、红色、发光算问题。',
  'q.6男主长相和图片2比': '变老、变成方下巴、长出胡茬、头发变短变黑、耳鳍不见了？',
@@ -284,7 +333,7 @@ SLOTS = {'q.HER_HAIR_BAD': '发色变成黑色、棕色或金黄色、头发变�
  'r.OPEN_FRAME-2': '东廊里的双人中近景，男左女右并肩站着，两张脸都看得到',
  'r.OPEN_STATE': "OPEN_STATE = '开场那天清晨，海下王宫的东廊。⟦HE⟧ 站在画面左侧，她站在画面右侧，两人并肩站着、身体侧向对方，相距半臂；她刚从海里出来，橙红色长发和衣服湿透；摄政官 Vessa 拿着深蓝册子站在画面外左侧（这一刻画面里只有他们两人，Vessa 只有声音，要正面出镜只能放在 seg2 并写进 "
                  "cast）。她跳海去救被潮水卷走的好友米拉，被他救进王宫；维萨说未登记的访客会被扣留、关于这里的记忆会被封存；他刚当着维萨说她是他未来的新娘；维萨（画面外）冷冷地问她“Is that true?”，等她亲口回答，他也低头看着她。她还没回答。隐藏真相她还不知道：“未婚妻”是他临时编的，普通担保和通行证其实存在。'",
- 'r.OPEN_NEXTc': "'维萨问她是不是真的，他低头看着她，两人都在等她的回答。', 'en': 'Vessa asks if it is true. He looks down at her. Both wait for her answer.'}",
+ 'r.OPEN_NEXTc': "'维萨问你是不是真的，他低头看着你，两人都在等你的回答。', 'en': 'Vessa asks if it is true. He looks down at you. Both wait for your answer.'}",
  'r.Azh不挣开我是楼上': "'先配合他，找朋友要紧。', 'en': 'Play along—for now.', 'leads_to': 'K02：他低声让她先配合、保证带她去找米拉，维萨暂时放行'}",
  'r.Bzh放开我退后说清': "'当场反问：谁是你的新娘？', 'en': 'Call his bluff: whose bride?', 'leads_to': 'K02：他面不改色接住，维萨冷冷合上册子放行'}}",
  'r.segsLpromp': "'face'",

@@ -31,17 +31,56 @@ CAST = {
     'Vessa': ('Vessa：三十八岁女人，潮城摄政官、雷恩的姑母，沉稳成熟的脸，淡蓝灰色眼睛，银紫色编发盘起点缀珍珠，一对蓝色耳鳍，珍珠吊坠耳环，梅紫色高领刺绣长袍（领口一枚月牙胸针），半透明淡紫色长袖外罩，手里常拿一本深蓝皮面册子。长相和衣着以她的身份母版为准。', TU['vessa']),
     'Mila': ('Mila：二十一岁女人，斯凯最好的朋友，西方人长相，暖白皮肤和很多小雀斑，明亮的蓝眼睛，圆润友善的脸，蜜金色卷发扎成凌乱的高马尾（一侧琥珀色发夹），芥末黄连帽外套里面石板蓝 T 恤，灰色工装裤，白色运动鞋，脖子上挂着黑色相机背带。长相和衣着以她的身份母版为准。', TU['mila']),
 }
-HE_LOOK = 'Rian：二十三岁的人鱼王子，一米八五左右，年轻修长的游泳者身材（不壮硕），皮肤非常白皙干净；狭长清秀的脸，高颧骨、尖而精致的下颌（不是方下巴），直而细的鼻梁，深邃的淡紫灰色眼睛，平直的深银色眉毛，小而精致的嘴唇；凌乱有层次的银紫色长发（几缕垂在额前）；一对很大的半透明蓝紫色蹼状耳鳍；每只耳朵两颗白珍珠和一条长长的冰蓝水滴耳坠；一条细银链挂着蓝色水滴吊坠；左手腕一只细银镯，上臂一只银臂环，不戴戒指、不戴手表。宫廷装：一件半透明珍珠白虹彩蕾丝长披袍，在他的左肩用一枚大银月牙胸针束起，胸前垂下一串串珍珠和冰蓝水滴珠链，另一侧肩膀和那边胸口露在外面；长袍分成许多层不规则的半透明长片一直垂到脚踝，里面只隐约透出宽松的象牙白灯笼裤（脚踝收口），银色绑带凉鞋；不系腰带。进到水里他就是人鱼：赤裸修长的上身、珍珠和银臂环，一条很长的浅长春花蓝鳞尾和半透明白蓝鳍边（上身和尾巴约 3:7），同一时刻不会既有腿又有尾巴。他的长相和服装全程不变，以参考的身份母版为准。'
+HE_LOOK = 'Rian：二十三岁的人鱼王子，一米八五左右，年轻修长纤瘦的游泳者身材：窄肩细腰、手臂修长，胸腹平坦，没有块状腹肌和隆起的胸肌，不是健美身材，皮肤非常白皙干净；狭长清秀的脸，高颧骨、尖而精致的下颌（不是方下巴），直而细的鼻梁，深邃的淡紫灰色眼睛，平直的深银色眉毛，小而精致的嘴唇；凌乱有层次的银紫色长发（几缕垂在额前）；一对很大的半透明蓝紫色蹼状耳鳍；每只耳朵两颗白珍珠和一条长长的冰蓝水滴耳坠；一条细银链挂着蓝色水滴吊坠；左手腕一只细银镯，上臂一只银臂环，不戴戒指、不戴手表；除了这些身上没有任何别的饰物：没有金饰、护腕、手套、腰带、宝石项链。宫廷装：一件半透明珍珠白虹彩蕾丝长披袍，在他的左肩用一枚大银月牙胸针束起，披袍从左肩斜搭过胸前，盖住腹部和大半个胸口，只露出右肩、右臂和右侧锁骨下一小片；胸前垂下一串串珍珠和冰蓝水滴珠链；长袍分成许多层不规则的半透明长片一直垂到脚踝，里面只隐约透出宽松的象牙白灯笼裤（脚踝收口），银色绑带凉鞋；不系腰带。在王宫、套房、池边和岸上，他一直是人形：两条腿，整套宫廷装穿在身上，披袍始终在左肩用银月牙胸针别着、珍珠串垂在胸前，从侧面和背面看也能看到披袍；皮肤白皙光洁，手臂、肩膀、胸口和身上都没有鳞片，肤色不变深，身材不变壮；情绪起伏时只有耳鳍泛起淡蓝微光。只有剧情写到他整个人在海水里游的镜头才是人鱼：赤裸修长的上身，只有左肩一小片半透明纱用银月牙胸针别着、垂下珍珠串（不是长披袍），银臂环，一条很长的浅长春花蓝鳞尾和半透明白蓝鳍边（上身和尾巴约 3:7），同一时刻不会既有腿又有尾巴；尾巴化成腿是一瞬间的事：水光一闪之后就是光洁白皙的双腿，腿上没有鳞片和鳞纹，不会出现带鳞的腿或连体紧身裤。头发全程是过肩的银紫长发，湿了也不会变短、不会变成短碎发；脸全程是二十三岁的清秀少年感，不变老、不变粗犷；手臂和前臂是光洁皮肤，没有臂鳍、没有半透明鳍片，全身只有两只耳鳍。他的长相和服装全程不变，以参考的身份母版为准。'
+HE_BACK_RE = '披袍'  # V3.10：换回宫廷装时 wardrobe 一字不改写回定装（第 7 轮写成“宫廷上装与灯笼裤，肩披长披袍”，披袍画成不透明长外套）
+BEAT_FIX = {'锁骨上的细鳞': '耳鳍', '锁骨细鳞': '耳鳍', '耳鳍和耳鳍': '耳鳍', '细鳞亮起': '耳鳍亮起', '细鳞发': '耳鳍发', '维萨': 'Vessa', '米拉': 'Mila', '披上肩': '从左肩斜搭过胸前、在左肩别好银月牙胸针（右肩露在外面，不是两肩都披的外套）', '披在肩上': '从左肩斜搭过胸前、在左肩别好银月牙胸针'}  # V3.10：“锁骨细鳞亮起”被画成整条手臂、肩膀长满鳞片（S232959810 第 5 轮），鳞光只落在耳鳍；配角中文名统一成英文名，镜头栏里也认得出
 HER_FP = '她的手外形全程固定：纤细白皙的女性双手，指甲短而圆、裸色素甲，手指和手腕上空无一物，袖口是浅长春花蓝泡泡袖的系扣袖口。'
-HER = '她：二十二岁的成年女人，西方人的长相，白皙瓷肤，眼下和两颊淡淡的自然红晕，大而清澈的蓝灰色眼睛和长睫毛，柔和平直的眉毛，小巧的直鼻，饱满柔软的嘴唇，精致的鹅蛋脸，不显幼态；橙红色（铜橙色）的披散长发垂到背中间，柔软的波浪，几缕碎发贴着脸，左侧别着一枚小银月牙发夹，耳垂上一对小银圈耳环；浅长春花蓝的系扣衬衫（泡泡长袖、袖口有扣），细黑皮带，炭灰格纹高腰阔腿裤，奶油色粗跟短靴；指甲短而圆、裸色素甲，手指和手腕上空无一物。开场时她刚从海里出来，头发和衣服湿透贴身，之后会慢慢变干。她的长相、发型和服装全程不变，严格以她的身份母版（正面头像、全身正面、近景特写）为准。她的表情自然克制，情绪在眼神里。'
+HER = '她：二十二岁的成年女人，西方人的长相，白皙瓷肤，眼下和两颊淡淡的自然红晕，大而清澈的蓝灰色眼睛和长睫毛，柔和平直的眉毛，小巧的直鼻，饱满柔软的嘴唇，精致的鹅蛋脸，不显幼态；橙红色（铜橙色）的披散长发垂到背中间，柔软的波浪，几缕碎发贴着脸，左侧别着一枚小银月牙发夹，耳垂上一对小银圈耳环；浅长春花蓝的系扣衬衫（泡泡长袖、袖口有扣），细黑皮带，炭灰格纹高腰阔腿裤，奶油色粗跟短靴；指甲短而圆、裸色素甲，手指和手腕上空无一物。开场时她刚从海里出来，头发和衣服湿透贴身，之后会慢慢变干。她的长相、发型和服装全程不变，严格以她的身份母版（正面头像、全身正面、近景特写）为准；“新娘”“未婚妻”只是他编的称呼，她从不穿婚纱、礼服或长裙。她始终是人类：任何时候都是两条腿，没有鱼尾、没有鳍、没有鳞片，在水下也穿着衬衫长裤、用双腿踢水游。她的表情自然克制，情绪在眼神里。'
 WOLF = ''
+# V3.12（Vicky 11-05 复盘 S024754f68）：下水后导演层把穿着写成“不变”，第 8–11 轮他在水里还穿着宫廷披袍、长出两条腿又带着尾巴、尾巴变成绿色。
+# 分镜定稿前按地点统一他的形态：这一轮结束在海水里，穿着写成人鱼形态（带上人鱼定装参考、没有披袍和腿）；上岸后写回宫廷定装；水里那几拍删掉“披袍”的说法；她永远没有尾巴。
+SEA_HE = '人鱼形态（按人鱼定装）：赤裸修长白皙的上身，只有左肩一小片半透明纱用银月牙胸针别着、垂下几串珍珠，上臂银臂环，左腕细银镯，银紫长发、蓝紫耳鳍和珍珠耳坠照旧；从腰部往下是一条很长的浅长春花蓝鳞尾和半透明白蓝鳍边（上身和尾巴约 3:7）；没有长披袍、没有灯笼裤、没有凉鞋、没有腿'
+WATER_LOC = re.compile('水下|海里|海中|海水|礁海|海面|海蚀洞|洞口外|海底|水中')
+LAND_LOC = re.compile('夜市|岸上|街|码头|长凳|宫|厅|套房|台阶|走廊|东廊|房间|摊')
+ROBE_IN_WATER = [('披袍的肩', '肩'), ('披袍肩', '肩'), ('披袍的领口', '肩头'), ('披袍领口', '肩头'), ('披袍衣领', '肩头'), ('披袍的衣领', '肩头'), ('披袍下摆', '尾鳍'), ('攥住披袍', '攥住他的肩头'), ('抓住披袍', '抓住他的肩'), ('他的披袍', '他的肩'), ('披袍', '肩头'), ('双腿', '长尾'), ('两条腿', '长尾'), ('灯笼裤', '长尾')]
+
+
+def FORM_FIX(sp):
+    w0 = sp.get('wardrobe_start') or {}; w = sp.get('wardrobe_end') if isinstance(sp.get('wardrobe_end'), dict) else {}
+    loc = str(sp.get('location') or '')
+    end_water = bool(WATER_LOC.search(loc + str(sp.get('set') or '')[:30])) and not LAND_LOC.search(loc.replace('王宫外', ''))
+    start_water = '人鱼形态' in str(w0.get('he') or '')
+    before = w.get('he')
+    if end_water: w['he'] = SEA_HE
+    elif start_water or re.search('人鱼|长尾|鱼尾|尾巴', str(w.get('he') or '')): w['he'] = HE_DEFAULT
+    sp['wardrobe_end'] = w
+    if w.get('he') != w0.get('he'): sp['wardrobe_changed'] = True
+    fixed = []
+    if end_water and not start_water:  # 第 2 段带的是人鱼定装，开头还在台阶上的几拍会被画成水下的人鱼（11-05 实测 L041841a28）：第 2 段从第一拍水下镜头开始
+        seg2 = sp.get('seg2') or []; wet_i = next((i for i, b in enumerate(seg2) if isinstance(b, list) and b and re.search('水下|游|长尾|礁海|海里|下潜|潜入|海底', str(b[0]))), None)
+        if wet_i and len(seg2) - wet_i >= 3:
+            drop = seg2[:wet_i]; pend = any('呼吸坠' in str(b[0]) for b in drop)
+            keep = [b for b in drop if str(b[2] if len(b) > 2 else '').startswith('空镜') and re.search('礁海|水下|海里|海底', str(b[0]))]
+            sp['seg2'] = keep + seg2[wet_i:]
+            j = next((i for i, b in enumerate(sp['seg2']) if not str(b[2] if len(b) > 2 else '').startswith('空镜')), None)
+            if pend and j is not None and '呼吸坠' not in str(sp['seg2'][j][0]): sp['seg2'][j][0] = str(sp['seg2'][j][0]) + '，她颈间挂着海绿色呼吸坠'
+            fixed.append('seg2_land_cut:%d' % (len(drop) - len(keep)))
+    for k in ('seg1', 'seg2'):
+        wet = (k == 'seg2' and end_water) or (k == 'seg1' and start_water)
+        for b in sp.get(k) or []:
+            if not isinstance(b, list) or not b: continue
+            t = re.sub('她的(鱼)?尾巴|她的长尾|她的鱼尾', '她的双腿', str(b[0]))
+            if wet:
+                for a, c in ROBE_IN_WATER: t = t.replace(a, c)
+            if t != b[0]: fixed.append(k); b[0] = t
+    if before != w.get('he') or fixed: sp['form_fix'] = {'end_water': end_water, 'start_water': start_water, 'he': str(w.get('he'))[:20], 'beats': fixed}
 import json as _json2
 _ab = Path(__file__).resolve().parent / 'masters' / 'audio_bank.json'
 AUDIO_BANK = _json2.loads(_ab.read_text()) if _ab.exists() else {}  # V2.3：预先生成好的配乐和歌（每部剧自己一份），没有就不用
 SEAM = '第一个镜头接着上一刻往下演：两个人的姿势、手的位置和道具的状态都和上一刻一样，不把上一刻已经做完的动作再做一遍；换景别时同时换机位，不在同一个机位上突然放大缩小。'  # V1.2：评分里接缝跳回首帧、同轴跳切扣分最多
 KISS = '吻戏的拍法（V1.4）：靠近只用一个干脆的动作，不慢慢凑近；从嘴唇贴上开始，到动作里写明分开之前，是同一次连续的吻，正常速度，动作一直在细微地变化（头部角度微调、他的手在她背上收紧、她的手指攥紧他的肩），不慢动作、不定格、不僵住；切镜之后的镜头一开始两人就已经在接吻，接着上一镜继续，不重新靠近，不中途分开再吻；手的特写里手一定在动。两人的五官、发型、服装和男左女右在吻中保持不变：每个接吻镜头里 Rian 的脸都在画面左半边、脸朝画面右侧，她的脸都在画面右半边、脸朝画面左侧，近景和侧面近景也不对调（V1.4 便携包自测第 1 轮最后一个接吻近景两人左右对调）。'
 ACT = '表演自然：Rian 年轻自信、笑意从容，逗人时眼里带笑，认真时笑意收住、目光聚焦，说话自然，不压嗓、不耳语；被她逗到时会短暂移开目光；她说话干脆、反应快，带一点不买账的冷幽默，着急时声音会发紧；情绪在眼神和嘴角。'
-PACE = '节奏（V3.0，Vicky 11-04：说话、动作慢吞吞，有定格感）：人物说话是正常偏快的自然语速，一句接一句，句间不留长停顿；动作是真人速度的连续动作，一个动作做完马上接下一个，不慢动作、不定格、不在一个姿势上停住；镜头里始终有人在动或在说话。'
+PACE = '节奏（V3.0，Vicky 11-04：说话、动作慢吞吞，有定格感）：人物说话是正常偏快的自然语速，一句接一句，句间不留长停顿；动作是真人速度的连续动作，一个动作做完马上接下一个，不慢动作、不定格、不在一个姿势上停住；镜头里始终有人在动或在说话。表情跟着每个镜头写的情绪演（V3.11，Vicky 11-05：不要都是笑脸）：写了皱眉、愣住、警惕、冷笑、失落、紧张就照演；没写笑就不笑，不对着镜头微笑；质问、对峙、被拆穿、吃醋、宣布结果的镜头里人物不笑，主持人宣布规则时其他人在听，不一起大笑。'
 STYLE = ('画面和角色参考图是同一种渲染和画质：精致的三维恋爱游戏 CG 角色渲染，皮肤细节柔和自然，眼睛和睫毛清晰，发丝分明，织物和鳞片质感清楚；海下王宫低调电影感的光：按脸定曝光，一盏有来源的暖琥珀色烛光加蓝绿色水波光纹勾边，背景比脸暗一点但不发灰，浅景深；不雾、不灰、不柔焦、脸上不发光、不磨皮、不塑料感、不动漫，标准焦段，五官比例自然，画风全程统一；时间和光线按这个地点写的来，肤色保持参考图的颜色。'
          '镜头之间一律硬切，不用叠化、溶镜、淡入淡出、闪白或闪黑；同一地点所有镜头的光线、色温和色调完全一致，跟随这个地点的主光源，不突然变冷变暖、变亮变暗。')
 
@@ -286,9 +325,12 @@ def seg2_cast_refs(sp):
 def plate_for(sp):
     """V3.0（三真四假 S001455553：换到套房后第 2 段漂回泳池边，下一轮整轮都在泳池）：masters/urls.json 的 plates 是 {"地点关键词|关键词": 空景图}，这一轮的地点对上就用它当地点参考；没有 plates 的剧照旧。"""
     loc = str(sp.get('location') or '') + str(sp.get('set') or '')[:20]
-    for k, u in (TU.get('plates') or {}).items():
-        if any(x and x in loc for x in k.split('|')): return u
-    return None
+    when = str(sp.get('location') or '') + str(sp.get('set') or '')
+    day = bool(re.search('白天|上午|下午|中午|清晨|早上|早晨|晨光|阳光|日出|天亮', when)) and not re.search('夜|午夜|深夜|傍晚|黄昏|月光', str(sp.get('location') or ''))
+    hit = [(k, u) for k, u in (TU.get('plates') or {}).items() if any(x and x in loc for x in k.split('@')[0].split('|'))]
+    for k, u in hit:  # V3.11：键名带 @day 的是白天版空景（三真四假：泳池、套房、吧台），剧情写着白天就用它；原来白天的泳池戏照着夜景空景拍成了夜里
+        if k.endswith('@day') == day: return u
+    return next((u for k, u in hit if '@' not in k), None)
 
 
 def prompts(sp, mode, hands_in_frame=False, set_start=None, seg2_first=False, stage_start=None, worn=None, jacket_start=False):
@@ -328,7 +370,7 @@ TU = globals().get('TU') or {}  # 有的剧没有 masters/urls.json
 FEET = '脚入镜时：他穿银色绑带凉鞋（在水里是长尾），她穿奶油色粗跟短靴，不光脚，不换鞋；她不戴手表、不戴戒指，他只有左手腕的细银镯。'
 FEET_HE = '脚入镜时他穿银色绑带凉鞋（在水里是长尾）；他左手腕一只细银镯、上臂一只银臂环，不戴手表、不戴戒指。'
 LOOK_BASE = '泡泡袖|格纹|阔腿裤'
-HER_LOCK = 'She is a young Western woman: porcelain skin with a soft rosy blush, large clear blue-grey eyes with long lashes, soft straight brows, a small straight nose, full soft lips, a delicate oval face. Her hair is long, loose, flowing orange-red (copper-orange) to mid-back, soft waves, with a small silver crescent-moon hair clip on the left side; small silver hoop earrings. She wears a pale periwinkle-blue button-up blouse with full puffed long sleeves and buttoned cuffs, a thin black belt, charcoal-grey plaid high-waisted wide-leg trousers, cream heeled ankle boots. Short nude nails, no rings, no necklace.'
+HER_LOCK = 'She is a young Western woman: porcelain skin with a soft rosy blush, large clear blue-grey eyes with long lashes, soft straight brows, a small straight nose, full soft lips, a delicate oval face. Her hair is long, loose, flowing orange-red (copper-orange) to mid-back, soft waves, with a small silver crescent-moon hair clip on the left side; small silver hoop earrings. She wears a pale periwinkle-blue button-up blouse with full puffed long sleeves and buttoned cuffs, a thin black belt, charcoal-grey plaid high-waisted wide-leg trousers, cream heeled ankle boots. Short nude nails, no rings, no necklace. She is fully human at all times: two legs, never a mermaid tail, never fins or scales, even underwater; underwater she swims kicking her legs, still in her blouse and trousers.'
 HER_LOCK_CUSTOM = 'Short nude nails, no earrings, no necklace.'
 CLOTHED = '她从第一帧到最后一帧都穿着写到的衣服。'
 
@@ -471,6 +513,43 @@ def prompts(sp, mode, *a, **kw):
     return res
 
 
+# V3.11（Vicky 11-05：可以和其他男嘉宾互动，不只是两位男主）：一段里 Rian 不在画面、只有一位男配角和她时，这位男配角顶替男主的站位（画面左侧），
+# 主要人物、站位、参考图说明、声音、表演说明都换成他；Rian 的外形和服装不写进这一段（原来照写，三真四假 S020429353 吧台约会 Wes 时检查判“男主应为黑发”）。
+_prompts_v310 = prompts
+MALE = [c for c in CAST if '男人' in str(CAST[c][0])[:40]]
+
+
+def stand_in(beats):
+    """这一段的顶替男配角：没有一拍写到 Rian 或由他说话，画面里恰好一位男配角。否则 None。"""
+    if any('Rian' in str(b[0]) or (len(b) > 3 and str(b[3]) == 'Rian') for b in beats): return None
+    order = [c for b in beats for c in MALE if on_screen(c, b)]
+    return order[0] if order else None  # 两位男配角同场时，先出场的那位顶替站位，另一位按配角写
+
+
+def _swap(p, x):
+    m = re.search(r'主要人物是Rian（画面左侧）、她（画面右侧）和 ([^。]*?) \S个人（每人只有一个）。', p)
+    if m:
+        rest = [c for c in m.group(1).split('、') if c and c != x]
+        p = p.replace(m.group(0), f'主要人物是{x}（画面左侧）和她（画面右侧）' + (f'，还有 ' + '、'.join(rest) + f'，一共{NUM[2 + len(rest)]}个人（每人只有一个）。' if rest else '两个人。'))
+    for a_, b_ in (('主要人物是Rian（画面左侧）', f'主要人物是{x}（画面左侧）'), ('Rian 在画面左侧', f'{x} 在画面左侧'), ('Rian（画面左侧）', f'{x}（画面左侧）'),
+                   ('两人同在画面里时 Rian 永远在画面左侧', f'两人同在画面里时 {x} 永远在画面左侧'), ('画面里只有 Rian 一个人', f'画面里只有 {x} 一个人'),
+                   ('图片2是 Rian 的脸，图片3是他的服装', f'图片2和图片3都是 {x} 的身份母版（他的脸和服装）'), ('Rian 和她的长相、服装以这些图为准', f'{x} 和她的长相、服装以这些图为准'),
+                   ('画面里的手只长在 Rian 和她身上', f'画面里的手只长在 {x} 和她身上')):
+        p = p.replace(a_, b_)
+    p = p.replace(HE_LOOK, f'这一段 Rian 不在画面里：画面里的男人是 {x}，长相和穿着只按 {x} 的描述和身份母版，不是 Rian，下面写到的 Rian 的服装、鞋和配饰这一段都不出现。')
+    p = p.replace(ACT, f'表演自然：{x} 按他自己的性格演（见他的描述），表情跟着这一拍的情绪；她说话干脆，带一点不买账的冷幽默。')
+    return re.sub('Rian 是[^；。]*?男声', f'{x} 是和他年龄、性格相符的自然美式英语男声', p)
+
+
+def prompts(sp, mode, *a, **kw):
+    out = _prompts_v310(sp, mode, *a, **kw); res = []
+    for k, (d, p, f) in enumerate(out):
+        x = stand_in(sp.get('seg1' if k == 0 else 'seg2') or [])
+        sp[f'stand_in{k + 1}'] = x
+        res.append((d, _swap(p, x) if x else p, f))
+    return res
+
+
 def _sing_marks(p, sg, beats):
     """V2.3：唱的那几拍写明嘴跟着旋律动，没有说话声（歌声播放时叠上去）。"""
     who = '她' if sg.get('who') == '她' else '他'; n = [-1]
@@ -499,7 +578,7 @@ def swatch(w):
 def key_people(w, her_url=None):
     """V2.4 关键帧的人物图：穿着图本身带脸，直接替换头像，始终 3 张（实测每多一张图关键帧慢 10 秒以上：3 张 11–25 秒，4 张 22–32 秒）。回归 R4 只给头像，关键帧把开衫画丢了。"""
     w = w or {}; he, she = str(w.get('he') or ''), str(w.get('she') or '')
-    h = TU.get('look_he_off') if re.search('赤裸|光着|裸', he) else TU.get('outfit')
+    h = TU.get('look_he_off') if re.search('赤裸|光着|裸|人鱼|长尾', he) else TU.get('outfit')  # V3.10：人鱼王子的人鱼形态也用“没穿上衣”的定装
     s = (TU.get('look_she_on') if (not she or LOOK_OUTER in she) else TU.get('look_she_off')) if is_base(she) else her_url  # V2.6：她自己换的衣服，第一次只给脸，之后用第一次画出来的那张
     return h, s
 
@@ -513,7 +592,7 @@ def anchor_prompt(state, issues, w=None, objects='', vehicle=False):
             + (f'The state of this moment, keep it exactly (Chinese): {state}。 ' if state else '')
             + 'Keep every object exactly as it is in Image 1 and do not add any object that is not already visible in Image 1, including clothes on the ground. '
             + (f'Also fix (Chinese): {"；".join(issues)}。 ' if issues else '')
-            + 'He: 23, very pale smooth skin, long messy layered silver-lilac hair, large translucent blue-violet fin ears, straight dark-silver brows, deep-set lavender-grey eyes, a long narrow slender face with a fine pointed jaw, a thin silver bangle on his left wrist, no tattoos, no rings, no watch. His face is long, narrow and slender with high cheekbones and a fine pointed jaw, deep-set lavender-grey eyes, straight dark-silver brows, very pale skin. His hair is long, messy, layered silver-lilac, never short, never black. Large translucent blue-violet webbed fin ears with white pearls and long ice-blue teardrop earrings; a blue teardrop pendant on a fine silver chain; a thin silver bangle on his left wrist and a silver upper-arm band. He wears a sheer ivory iridescent lace robe gathered on his left shoulder under a large silver crescent-moon brooch, strands of pearls and ice-blue beads down his chest, the other shoulder bare, the robe falling in sheer layered panels to his ankles over loose ivory harem trousers, silver strappy sandals. No belt, no tattoos, no rings, no watch. Young slim swimmer build, not bulky. In water he has a long pale periwinkle-blue scaled tail instead of legs. '
+            + 'He: 23, very pale smooth skin, long messy layered silver-lilac hair, large translucent blue-violet fin ears, straight dark-silver brows, deep-set lavender-grey eyes, a long narrow slender face with a fine pointed jaw, a thin silver bangle on his left wrist, no tattoos, no rings, no watch. His face is long, narrow and slender with high cheekbones and a fine pointed jaw, deep-set lavender-grey eyes, straight dark-silver brows, very pale skin. His hair is long, messy, layered silver-lilac, never short, never black. Large translucent blue-violet webbed fin ears with white pearls and long ice-blue teardrop earrings; a blue teardrop pendant on a fine silver chain; a thin silver bangle on his left wrist and a silver upper-arm band. He wears a sheer ivory iridescent lace robe gathered on his left shoulder under a large silver crescent-moon brooch, strands of pearls and ice-blue beads down his chest, the other shoulder bare, the robe falling in sheer layered panels to his ankles over loose ivory harem trousers, silver strappy sandals. No belt, no tattoos, no rings, no watch. Young slim swimmer build: narrow shoulders, slender arms, flat chest and stomach, no visible six-pack, not muscular. The robe crosses his chest diagonally from the left shoulder and covers his stomach and most of his chest; only the right shoulder, right arm and a little of the right collarbone show. No other jewellery: no gold, no bracers, no gloves, no sash, no gem necklace. His skin is smooth and pale everywhere: no scales on his arms, shoulders, chest or torso, not tanned, not muscular-bulky; only his fin ears may glow faintly blue. On land, indoors and by the pool he stands on two legs with the robe on, pinned at his left shoulder by the brooch. Only when he is swimming in sea water does he have a long pale periwinkle-blue scaled tail instead of legs. His hair is always long, past his shoulders, even when soaking wet or in the wind: never short, never spiky, never cropped; his face always stays 23 and youthful, never older, never rugged. His arms and forearms are plain smooth skin: no fins, no translucent arm frills, no scale patterns; the only fins are his two ear fins. In the sea he is fully merman exactly like his merman reference: bare chest with only a small sheer sash pinned at his left shoulder by the crescent brooch, no long robe, no trousers, no legs; the tail is pale periwinkle blue with white-blue fin frills, never green or teal. '
             'She: adult aged 22, a young Western woman with a delicate oval face, porcelain skin, a soft rosy blush, large clear blue-grey eyes, long loose flowing orange-red hair to mid-back with a small silver crescent-moon clip on the left side, small silver hoop earrings; short nude nails, no rings, no bracelet. ' + her_lock(w) + ' '
             + ('There is exactly one motorcycle. ' if vehicle else 'There is no motorcycle, car or any other vehicle in this frame. ')
             + 'Every object appears only once. Keep the same refined 3D romance-game CG character rendering. Correct anatomy, five fingers on each hand. Add nothing new. No text, no logo, no watermark.')
@@ -540,7 +619,7 @@ def key_prompt(sp, moved):
             + (f'Fixed object looks (Chinese): ' + '；'.join(f'{k}：{v}' for k, v in (sp.get('looks') or {}).items() if k in str(sp.get('key')) or k in str(sp.get('holding_end'))) + '。 ' if any(k in str(sp.get('key')) or k in str(sp.get('holding_end')) for k in (sp.get('looks') or {})) else '')
             + 'If his torso is bare: a natural fit build, not a bodybuilder, no oil, the same skin color as his face, lit by the light of this location. '
             + ('Nothing from the previous location comes along: no plates, food, cartons or furniture from it, only what is written under Objects. ' if moved else '')
-            + 'Exactly two people: the man on the left of the frame, the woman on the right, both faces visible. He: 23, very pale smooth skin, long messy layered silver-lilac hair, large translucent blue-violet fin ears, straight dark-silver brows, deep-set lavender-grey eyes, a long narrow slender face with a fine pointed jaw, a thin silver bangle on his left wrist, no tattoos, no rings, no watch. His face is long, narrow and slender with high cheekbones and a fine pointed jaw, deep-set lavender-grey eyes, straight dark-silver brows, very pale skin. His hair is long, messy, layered silver-lilac, never short, never black. Large translucent blue-violet webbed fin ears with white pearls and long ice-blue teardrop earrings; a blue teardrop pendant on a fine silver chain; a thin silver bangle on his left wrist and a silver upper-arm band. He wears a sheer ivory iridescent lace robe gathered on his left shoulder under a large silver crescent-moon brooch, strands of pearls and ice-blue beads down his chest, the other shoulder bare, the robe falling in sheer layered panels to his ankles over loose ivory harem trousers, silver strappy sandals. No belt, no tattoos, no rings, no watch. Young slim swimmer build, not bulky. In water he has a long pale periwinkle-blue scaled tail instead of legs. '
+            + 'Exactly two people: the man on the left of the frame, the woman on the right, both faces visible. He: 23, very pale smooth skin, long messy layered silver-lilac hair, large translucent blue-violet fin ears, straight dark-silver brows, deep-set lavender-grey eyes, a long narrow slender face with a fine pointed jaw, a thin silver bangle on his left wrist, no tattoos, no rings, no watch. His face is long, narrow and slender with high cheekbones and a fine pointed jaw, deep-set lavender-grey eyes, straight dark-silver brows, very pale skin. His hair is long, messy, layered silver-lilac, never short, never black. Large translucent blue-violet webbed fin ears with white pearls and long ice-blue teardrop earrings; a blue teardrop pendant on a fine silver chain; a thin silver bangle on his left wrist and a silver upper-arm band. He wears a sheer ivory iridescent lace robe gathered on his left shoulder under a large silver crescent-moon brooch, strands of pearls and ice-blue beads down his chest, the other shoulder bare, the robe falling in sheer layered panels to his ankles over loose ivory harem trousers, silver strappy sandals. No belt, no tattoos, no rings, no watch. Young slim swimmer build: narrow shoulders, slender arms, flat chest and stomach, no visible six-pack, not muscular. The robe crosses his chest diagonally from the left shoulder and covers his stomach and most of his chest; only the right shoulder, right arm and a little of the right collarbone show. No other jewellery: no gold, no bracers, no gloves, no sash, no gem necklace. His skin is smooth and pale everywhere: no scales on his arms, shoulders, chest or torso, not tanned, not muscular-bulky; only his fin ears may glow faintly blue. On land, indoors and by the pool he stands on two legs with the robe on, pinned at his left shoulder by the brooch. Only when he is swimming in sea water does he have a long pale periwinkle-blue scaled tail instead of legs. His hair is always long, past his shoulders, even when soaking wet or in the wind: never short, never spiky, never cropped; his face always stays 23 and youthful, never older, never rugged. His arms and forearms are plain smooth skin: no fins, no translucent arm frills, no scale patterns; the only fins are his two ear fins. In the sea he is fully merman exactly like his merman reference: bare chest with only a small sheer sash pinned at his left shoulder by the crescent brooch, no long robe, no trousers, no legs; the tail is pale periwinkle blue with white-blue fin frills, never green or teal. '
             'She: adult aged 22, a young Western woman with a delicate oval face, porcelain skin, a soft rosy blush, large clear blue-grey eyes, long loose flowing orange-red hair to mid-back with a small silver crescent-moon clip on the left side, small silver hoop earrings; short nude nails, no rings, no bracelet. ' + her_lock(w) + ' '
             + ('There is exactly one motorcycle. ' if veh else 'There is no motorcycle, car or any other vehicle in this frame. ')
             + 'Every object appears only once. Keep the same refined 3D romance-game CG character rendering as Image 1. Correct anatomy, five fingers on each hand. No text, no logo, no watermark.')
