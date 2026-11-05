@@ -205,8 +205,8 @@ function pick(v, s){ return s.url ? (v.dataset.started ? v.dataset.src : s.url) 
 function warm(v){ if (!v.src || v.dataset.started || !v.paused || v.readyState < 1) return; const b = v.buffered; if (v.duration > 0 && b.length && b.end(b.length - 1) >= v.duration - 0.3) return;
   v.dataset.warm = '1'; v.muted = true; try { v.playbackRate = 0.0625; } catch (e) {} v.play().catch(() => {}); }
 function bufEta(v){ const b = v.buffered, end = b.length ? b.end(b.length - 1) : 0; if (!(v.duration > 0) || !end) return Infinity; if (end >= v.duration - 0.3) return 0;
-  if (!v._b0 || v._bsrc !== v.src){ v._b0 = Date.now(); v._e0 = end; v._bsrc = v.src; return Infinity; } const dt = (Date.now() - v._b0) / 1000, rate = (end - v._e0) / dt;
-  return dt > 1.5 && rate > 0 ? (v.duration - end) / rate : Infinity; }  // 还要几秒下完（按这一段实测的缓冲速度）
+  if (!v._b0 || v._bsrc !== v.src){ v._b0 = Date.now(); v._e0 = end; v._bsrc = v.src; return Infinity; } const dt = (Date.now() - v._b0) / 1000, avg = end / Math.max(1, (Date.now() - v._tl) / 1000), rate = Math.min((end - v._e0) / dt, avg);
+  return dt > 1.5 && rate > 0 ? (v.duration - end) / rate : Infinity; }  // 还要几秒下完（按这一段实测的缓冲速度；11-05 取较慢的那个：从开始加载算的平均速度含首包等待。Vivix CDN 先快后慢时只看后者会估得太乐观，Meet-me 实测两段之间停了 11.5 秒）
 function enough(v, need, wait){ const b = v.buffered, end = b.length ? b.end(b.length - 1) : 0;
   if (v.duration > 0 && end >= Math.min(v.duration - 0.3, v.currentTime + need)) return true;
   if (v.readyState >= 3){ const now = Date.now(); if (!v._r3 || v._r3src !== v.src){ v._r3 = now; v._r3src = v.src; } return now - v._r3 >= (wait || 10000); } return false; }
