@@ -94,6 +94,23 @@ body.choosing #bar,body.ended #bar,body.start #bar{display:none}
 #menu{position:absolute;z-index:9;top:calc(58px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));min-width:200px;background:rgba(14,16,20,.96);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:6px;display:flex;flex-direction:column}
 #menu button{background:none;border:0;text-align:left;padding:11px 12px;border-radius:9px;font-size:14px;cursor:pointer;display:flex;justify-content:space-between;gap:12px}
 #menu button:hover{background:rgba(255,255,255,.06)}
+/* 人物资料（11-05 Vicky：多人内容右上角加资料夹，能查人物信息，不然分不清谁是谁） */
+.acts{display:flex;gap:8px;align-items:center}
+#cast{position:absolute;inset:0;z-index:30;background:#08090c;display:flex;flex-direction:column;gap:12px;padding:calc(14px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+#cast .ch{display:flex;justify-content:space-between;align-items:center}
+#cast h2{font-family:var(--display);font-size:24px;font-weight:600;letter-spacing:.06em;margin:0;text-transform:uppercase}
+#cast .rule{font-size:13px;color:var(--mute);line-height:1.45}
+#cast .rule .zh{font-family:var(--zh)}
+#castList{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:max-content;gap:10px;align-content:start;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+.pc{border:1px solid rgba(255,255,255,.12);border-radius:12px;overflow:hidden;background:rgba(255,255,255,.03);display:flex;flex-direction:column}
+.pc img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#f2f2f2}
+.pc .pb{padding:8px 10px 10px;display:flex;flex-direction:column;gap:3px}
+.pc .pn{font-family:var(--display);font-size:16px;letter-spacing:.04em}
+.pc .pr{font-size:11px;letter-spacing:.06em;color:var(--gold);text-transform:uppercase}
+.pc .pd{font-size:12.5px;line-height:1.4;color:#d9d4cb}
+.pc .tag{align-self:flex-start;font-size:10.5px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--gold);margin-top:2px}
+.pc.out img{filter:grayscale(1) brightness(.6)}
+.pc.out .tag{border-color:rgba(255,255,255,.25);color:#cfcfcf}
 #menu button small{color:var(--mute)}
 #toast{position:absolute;z-index:10;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.14);padding:8px 14px;border-radius:999px;font-size:12.5px;white-space:nowrap}
 .dots{display:inline-flex;gap:4px}.dots i{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:d 1s infinite}.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
@@ -118,8 +135,14 @@ body.lang-en .zh{display:none!important}
   <div class="shade" id="shade"></div>
   <header id="top">
     <div class="brand"><b>Rian</b> Almost Bride <span>LIVE</span></div>
-    <button class="icon" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="#e8e8e8" stroke-width="1.8" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button>
+    <div class="acts"><button class="icon" id="castBtn" aria-label="Cast"><svg viewBox="0 0 24 24" fill="none" stroke="#e8e8e8" stroke-width="1.7" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>
+    <button class="icon" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="#e8e8e8" stroke-width="1.8" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button></div>
   </header>
+  <aside id="cast" hidden aria-label="Cast">
+    <div class="ch"><h2 id="castTitle">Cast</h2><button class="icon" id="castClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="#e8e8e8" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="rule" id="castRule"></div>
+    <div id="castList"></div>
+  </aside>
   <nav id="menu" hidden>
     <button id="mLang"><span>Interface language</span><small id="mLangV"></small></button>
     <button id="mRestart"><span>Restart from the opening</span></button>
@@ -169,7 +192,7 @@ const waitMusic = on => { waitTarget = on ? .3 : 0; if (on && wait.paused) wait.
 const LANGQ = (Q.get('lang') || '').toLowerCase();
 let lang = LANGQ.startsWith('zh') ? 'zh' : LANGQ.startsWith('en') ? 'en' : (/^zh/i.test(navigator.language || '') ? 'zh' : 'en');
 const T = (en, zh) => lang === 'zh' ? zh : en;
-RT.init({drama: 'sea-prince-live', zh: () => lang === 'zh'});
+RT.init({drama: 'sea-prince-live', ignore: '#cast', zh: () => lang === 'zh'});
 
 const applyLang = () => {
   document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en'; document.body.classList.toggle('lang-en', lang === 'en');
@@ -229,6 +252,16 @@ $('startBtn').onclick = async () => {
   startSession().catch(e => setChip('<b>Could not start</b> · ' + esc(e.message)));
   playOpening();
 };
+// 人物资料（11-05 Vicky：多人内容右上角加资料夹，看人物信息，不然分不清谁是谁）：只写她此刻能知道的，不剧透
+const CAST_INFO = [["her", "You · Skye", "你 · 斯凯", "Dive-guide trainee from Saltpoint", "盐点港的潜水向导学员", "Brave, quick, sharp-tongued. Here to find Mila.", "勇敢、反应快、嘴上不饶人。来这里是为了找回米拉。"], ["rian", "Rian", "雷恩", "Mer-prince of the Tide City", "潮城的人鱼王子", "Young, confident, flirts easily. Called you his future bride in front of everyone.", "年轻、自信、爱调情。当众说你是他未来的新娘。"], ["vessa", "Vessa", "维萨", "Regent · Rian's aunt", "摄政官 · 雷恩的姑母", "Calm, follows the rules, wary of outsiders. Always carries a dark-blue ledger.", "冷静、讲规矩，对外来者警惕，手里常拿一本深蓝皮面的册子。"], ["mila", "Mila", "米拉", "Your best friend", "你最好的朋友", "Marine-film student, never without her camera. Swept away by the tide.", "海洋影像专业学生，相机不离手，被潮水卷走了。"]];
+const CAST_RULE = ["You dove in after your best friend and woke up in an undersea palace. The prince just told everyone you are his bride.", "你为了找回被潮水卷走的好友跳进海里，醒来在海下王宫；王子刚当众说你是他的新娘。"];
+function renderCast(){
+  $('castTitle').textContent = T('Cast', '人物资料'); $('castRule').innerHTML = esc(T(CAST_RULE[0], CAST_RULE[1]));
+  $('castList').innerHTML = CAST_INFO.map(([id, en, zh, ren, rzh, den, dzh]) => `<div class="pc"><img src="media/cast/${id}.jpg" alt="" loading="lazy"><div class="pb"><div class="pn">${esc(T(en, zh))}</div><div class="pr">${esc(T(ren, rzh))}</div><div class="pd">${esc(T(den, dzh))}</div></div></div>`).join('');
+}
+function closeCast(){ $('cast').hidden = true; if ($('cast').dataset.resume){ delete $('cast').dataset.resume; front.play().catch(() => {}); } }
+$('castBtn').onclick = () => { $('menu').hidden = true; if (!front.paused){ front.pause(); $('cast').dataset.resume = 1; } renderCast(); $('cast').hidden = false; };
+$('castClose').onclick = closeCast;
 let replayFn = null;
 function playOpening(){
   showSub(null); ov.currentTime = 0; ov.muted = false; ov.loop = false;
