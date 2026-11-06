@@ -147,6 +147,7 @@ body.lang-en .zh{display:none!important}
   <div id="toast" hidden></div>
 </div>
 <script src="rt-player.js?v=6"></script>
+<script src="rt-history.js?v=1dd85f11"></script>
 <script>
 (() => {
 const $ = id => document.getElementById(id);
@@ -231,7 +232,7 @@ $('startBtn').onclick = async () => {
 let replayFn = null;
 function playOpening(){
   showSub(null); ov.currentTime = 0; ov.muted = false; ov.loop = false;
-  RT.begin({key: 'OPEN', parts: [{v: ov, d: 94.5}]}); replayFn = playOpening;
+  RT.begin({hist: {cues: (typeof OPEN_CUES !== 'undefined' ? OPEN_CUES : null)}, key: 'OPEN', parts: [{v: ov, d: 94.5}]}); replayFn = playOpening;
   const go = () => ov.play().then(() => show(ov)).catch(() => { show(ov); toast(T('Tap the screen to start', '点一下画面开始')); });
   if (enough(ov, 8, 6000)) go();
   else {  // 先在点击里起播再停住（保住播放权限），缓冲够了再接着播
@@ -297,7 +298,7 @@ async function liveRound(kind, choice, said){
   if (!segErr() && r.status !== 'error'){
     $('liveWait').hidden = true; waitMusic(false); setMode('playing');
     view.play_at = Date.now(); view.seg2_eta = r.segs[1] ? r.segs[1].eta_left : null;
-    RT.begin({key: 'round:' + rid, mix: r.mix, parts: r.segs.map((x, i) => ({v: V[i], d: x.dur || x.seconds})), label: T(`Scene ${round + 1}`, `第 ${round + 1} 幕`)}); RT.part(0);
+    RT.begin({hist: {r: r, her: (typeof herLine !== 'undefined' ? herLine : (typeof said !== 'undefined' && said ? (said.zh || said.en || '') : ''))}, key: 'round:' + rid, mix: r.mix, parts: r.segs.map((x, i) => ({v: V[i], d: x.dur || x.seconds})), label: T(`Scene ${round + 1}`, `第 ${round + 1} 幕`)}); RT.part(0);
     await play(0); view.seg1_end = Date.now();
     const ok2 = () => segErr() || (r.segs[1].url && srcOf(r.segs[1]).includes(V[1].dataset.src) && enough(V[1], 99, 15000));
     if (!ok2()){ waitMusic(true); while (!ok2() && my === liveRun) await new Promise(res => setTimeout(res, 100)); waitMusic(false); }  // 第 2 段还没到：停在第 1 段最后一帧
@@ -314,7 +315,7 @@ async function liveRound(kind, choice, said){
   const sceneNo = round + 1;
   replayFn = () => {  // 重看：看过了，可以随意拖；两段之间拖动时直接跳到那一段
     const go = (j, t) => { const v = V[j]; subsFor(j, v); v.currentTime = t; v.muted = false; v.loop = false; v.onended = () => { v.ontimeupdate = null; showSub(null); if (j + 1 < V.length){ RT.part(j + 1); go(j + 1, 0); } else { v.onended = null; RT.clear(); openChoice(); } }; v.play().then(() => show(v)).catch(() => {}); };
-    RT.begin({key: 'round:' + rid, mix: r.mix, free: true, parts: r.segs.map((x, i) => ({v: V[i], d: x.dur || x.seconds})), label: T(`Scene ${sceneNo}`, `第 ${sceneNo} 幕`), jump: (j, t) => { V.forEach(x => { if (x !== V[j]){ x.pause(); x.onended = null; x.ontimeupdate = null; } }); go(j, t); }});
+    RT.begin({hist: {r: r, her: (typeof herLine !== 'undefined' ? herLine : (typeof said !== 'undefined' && said ? (said.zh || said.en || '') : ''))}, key: 'round:' + rid, mix: r.mix, free: true, parts: r.segs.map((x, i) => ({v: V[i], d: x.dur || x.seconds})), label: T(`Scene ${sceneNo}`, `第 ${sceneNo} 幕`), jump: (j, t) => { V.forEach(x => { if (x !== V[j]){ x.pause(); x.onended = null; x.ontimeupdate = null; } }); go(j, t); }});
     go(0, 0);
   };
   round++; next = r.next || next; openChoice();
