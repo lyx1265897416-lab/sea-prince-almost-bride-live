@@ -269,6 +269,7 @@ function addUnlock(list, rd){
     if (!c || c[0] === 'her' || !(u.zh || u.en)) return; UNLOCK[c[0]] = {zh: u.zh || u.en, en: u.en || u.zh, rd}; hit = true; });
   if (hit){ saveUnlock(); $('castBtn').classList.add('new'); }
 }
+window.__castUnlock = addUnlock;   // 调试用：手动喂一条 unlock 看卡片
 function renderCast(){
   $('castTitle').textContent = T('Cast', '人物资料'); $('castRule').innerHTML = esc(T(CAST_RULE[0], CAST_RULE[1]));
   $('castList').innerHTML = CAST_INFO.map(([id, en, zh, ren, rzh, den, dzh]) => { const uk = UNLOCK[id]; const rv = uk ? `<div class="rv"><b>${esc(T('Revealed · Act ' + uk.rd, '已揭晓 · 第 ' + uk.rd + ' 幕'))}</b>${esc(T(uk.en, uk.zh))}</div>` : ''; return `<div class="pc${uk ? ' rvd' : ''}"><img src="media/cast/${id}.jpg" alt="" loading="lazy"><div class="pb"><div class="pn">${esc(T(en, zh))}</div><div class="pr">${esc(T(ren, rzh))}</div><div class="pd">${esc(T(den, dzh))}</div>${rv}</div></div>`; }).join('');
