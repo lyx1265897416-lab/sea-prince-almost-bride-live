@@ -110,6 +110,11 @@ body.choosing #bar,body.ended #bar,body.start #bar{display:none}
 .pc .pd{font-size:12.5px;line-height:1.4;color:#d9d4cb}
 .pc .tag{align-self:flex-start;font-size:10.5px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--gold);margin-top:2px}
 .pc.out img{filter:grayscale(1) brightness(.6)}
+#castBtn{position:relative}
+#castBtn.new::after{content:"";position:absolute;top:5px;right:5px;width:9px;height:9px;border-radius:50%;background:#ff5c8d;box-shadow:0 0 0 2px #08090c}
+.pc.rvd{border-color:rgba(255,92,141,.6)}
+.pc .rv{margin-top:5px;padding:6px 8px;border-radius:8px;background:rgba(255,92,141,.12);border:1px solid rgba(255,92,141,.45);font-size:12px;line-height:1.4;color:#ffe1ea}
+.pc .rv b{display:block;font-size:10.5px;letter-spacing:.06em;color:#ff8fb3;font-weight:600;margin-bottom:2px}
 .pc.out .tag{border-color:rgba(255,255,255,.25);color:#cfcfcf}
 #menu button small{color:var(--mute)}
 #toast{position:absolute;z-index:10;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.14);padding:8px 14px;border-radius:999px;font-size:12.5px;white-space:nowrap}
@@ -244,7 +249,7 @@ async function api(path, body){ await relayReady; const r = await fetch(API + pa
 // 开场
 const ov = pool[1]; load(ov, SRC('media/OPEN.mp4')); const idle = pool[2]; load(idle, SRC('media/IDLE0.mp4'), true);
 if (PAGES) [[ov, 'media/OPEN.mp4'], [idle, 'media/IDLE0.mp4']].forEach(([v, p]) => v.addEventListener('error', () => { if (!v.src.endsWith(p)) { v.src = p; v.load(); } }));
-async function startSession(){ if (!K){ next = PREVIEW_NEXT; return; } const j = await api('/api/session', {mode: MODE}); sid = j.sid; next = j.next; round = 0; }
+async function startSession(){ UNLOCK = {}; saveUnlock(); $('castBtn').classList.remove('new'); if (!K){ next = PREVIEW_NEXT; return; } const j = await api('/api/session', {mode: MODE}); sid = j.sid; next = j.next; round = 0; }
 $('startBtn').onclick = async () => {
   $('startCard').hidden = true; setMode('playing');
   [pool[0], idle].forEach(v => { const p = v.play(); if (p) p.then(() => { if (v !== front) v.pause(); }).catch(() => {}); });  // 在这次点击里解锁
@@ -255,12 +260,21 @@ $('startBtn').onclick = async () => {
 // 人物资料（11-05 Vicky：多人内容右上角加资料夹，看人物信息，不然分不清谁是谁）：只写她此刻能知道的，不剧透
 const CAST_INFO = [["her", "You · Skye", "你 · 斯凯", "Dive-guide trainee from Saltpoint", "盐点港的潜水向导学员", "Brave, quick, sharp-tongued. Here to find Mila.", "勇敢、反应快、嘴上不饶人。来这里是为了找回米拉。"], ["rian", "Rian", "雷恩", "Mer-prince of the Tide City", "潮城的人鱼王子", "Young, confident, flirts easily. Called you his future bride in front of everyone.", "年轻、自信、爱调情。当众说你是他未来的新娘。"], ["vessa", "Vessa", "维萨", "Regent · Rian's aunt", "摄政官 · 雷恩的姑母", "Calm, follows the rules, wary of outsiders. Always carries a dark-blue ledger.", "冷静、讲规矩，对外来者警惕，手里常拿一本深蓝皮面的册子。"], ["mila", "Mila", "米拉", "Your best friend", "你最好的朋友", "Marine-film student, never without her camera. Swept away by the tide.", "海洋影像专业学生，相机不离手，被潮水卷走了。"]];
 const CAST_RULE = ["You dove in after your best friend and woke up in an undersea palace. The prince just told everyone you are his bride.", "你为了找回被潮水卷走的好友跳进海里，醒来在海下王宫；王子刚当众说你是他的新娘。"];
+// 身份揭晓（V3.14）：中转每轮给 unlock [{who, zh, en}]，这一幕播完时记下，卡片标“已揭晓”，文件夹按钮亮红点；新开一局清空
+const UK_KEY = 'unlock:' + location.pathname; let UNLOCK = {}; try { UNLOCK = JSON.parse(sessionStorage.getItem(UK_KEY) || '{}'); } catch (e) {}
+const saveUnlock = () => { try { sessionStorage.setItem(UK_KEY, JSON.stringify(UNLOCK)); } catch (e) {} };
+function addUnlock(list, rd){
+  let hit = false;
+  (list || []).forEach(u => { const w = String(u.who || '').trim().toLowerCase(); const c = CAST_INFO.find(x => x[0] === w || x[1].toLowerCase().split(' · ').pop() === w || x[1].toLowerCase() === w);
+    if (!c || c[0] === 'her' || !(u.zh || u.en)) return; UNLOCK[c[0]] = {zh: u.zh || u.en, en: u.en || u.zh, rd}; hit = true; });
+  if (hit){ saveUnlock(); $('castBtn').classList.add('new'); }
+}
 function renderCast(){
   $('castTitle').textContent = T('Cast', '人物资料'); $('castRule').innerHTML = esc(T(CAST_RULE[0], CAST_RULE[1]));
-  $('castList').innerHTML = CAST_INFO.map(([id, en, zh, ren, rzh, den, dzh]) => `<div class="pc"><img src="media/cast/${id}.jpg" alt="" loading="lazy"><div class="pb"><div class="pn">${esc(T(en, zh))}</div><div class="pr">${esc(T(ren, rzh))}</div><div class="pd">${esc(T(den, dzh))}</div></div></div>`).join('');
+  $('castList').innerHTML = CAST_INFO.map(([id, en, zh, ren, rzh, den, dzh]) => { const uk = UNLOCK[id]; const rv = uk ? `<div class="rv"><b>${esc(T('Revealed · Act ' + uk.rd, '已揭晓 · 第 ' + uk.rd + ' 幕'))}</b>${esc(T(uk.en, uk.zh))}</div>` : ''; return `<div class="pc${uk ? ' rvd' : ''}"><img src="media/cast/${id}.jpg" alt="" loading="lazy"><div class="pb"><div class="pn">${esc(T(en, zh))}</div><div class="pr">${esc(T(ren, rzh))}</div><div class="pd">${esc(T(den, dzh))}</div>${rv}</div></div>`; }).join('');
 }
 function closeCast(){ $('cast').hidden = true; if ($('cast').dataset.resume){ delete $('cast').dataset.resume; front.play().catch(() => {}); } }
-$('castBtn').onclick = () => { $('menu').hidden = true; if (!front.paused){ front.pause(); $('cast').dataset.resume = 1; } renderCast(); $('cast').hidden = false; };
+$('castBtn').onclick = () => { $('menu').hidden = true; $('castBtn').classList.remove('new'); if (!front.paused){ front.pause(); $('cast').dataset.resume = 1; } renderCast(); $('cast').hidden = false; };
 $('castClose').onclick = closeCast;
 let replayFn = null;
 function playOpening(){
@@ -351,7 +365,7 @@ async function liveRound(kind, choice, said){
     RT.begin({hist: {r: r, her: (typeof herLine !== 'undefined' ? herLine : (typeof said !== 'undefined' && said ? (said.zh || said.en || '') : ''))}, key: 'round:' + rid, mix: r.mix, free: true, parts: r.segs.map((x, i) => ({v: V[i], d: x.dur || x.seconds})), label: T(`Scene ${sceneNo}`, `第 ${sceneNo} 幕`), jump: (j, t) => { V.forEach(x => { if (x !== V[j]){ x.pause(); x.onended = null; x.ontimeupdate = null; } }); go(j, t); }});
     go(0, 0);
   };
-  round++; next = r.next || next; openChoice();
+  round++; next = r.next || next; addUnlock(r.unlock, round); openChoice();
 
   function subLine(i, v){
     const Lns = (r.lines['seg' + (i + 1)] || []).filter(Boolean), Z = ((r.zh || {})['seg' + (i + 1)] || []).filter(Boolean), off = i === 1 ? 2 : 0;  // 第 2 段前 2 秒是静止承接
